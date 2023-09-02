@@ -1,6 +1,6 @@
 tucash api documentation
 1.
-/auth/register/
+tucash-api-production.up.railway.app/auth/register/
 
 POST:creates a new user
 json 
@@ -18,7 +18,7 @@ json
      
 ]
 2.
-/auth/login/
+tucash-api-production.up.railway.app/auth/login/
 POST :when you send the password and username of a created user you get token which you will use
 to send request
  example this post request :
@@ -39,7 +39,7 @@ to send request
 
 
 3.
-/homepage
+tucash-api-production.up.railway.app/homepage
 GET REQUEST:
 
 it just gives a http response "this is the homepage" to get the response you need to use the  put access_tokent on the vary_on_headers
