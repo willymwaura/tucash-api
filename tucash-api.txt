@@ -1,0 +1,46 @@
+tucash api documentation
+1.
+/auth/register/
+
+POST:creates a new user
+json 
+[
+    {
+    "email": "example1@example.com",
+    "first_name": "John",
+    "second_name": "Doe",
+    "third_name": "Moses",
+    "phone_number": "1234567890",
+    "timestamp": "2023-09-02T12:34:56.789Z",
+    "id_number": "1234567",
+    "password":"1234willy"
+}
+     
+]
+2.
+/auth/login/
+POST :when you send the password and username of a created user you get token which you will use
+to send request
+ example this post request :
+
+   {
+  
+    "password": "1234willy",
+  
+    "email": "example1@example.com"
+    
+}
+
+ gives you this :
+ {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjkzNjcyMzM1LCJqdGkiOiIyOWVkNGM1NjdjNTk0OWVkODA5OWU3ZTYyMzhjMGViYiIsInVzZXJfaWQiOjJ9._hHi479FryDCwPe3XqB4NYoZt-xkvrnz1ZQJ_arFiNs",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5Mzc1ODQzNSwianRpIjoiNTBjNzgwYjkyY2JlNDg2ZDlhMzkyZWM3ODBjNDVkZmYiLCJ1c2VyX2lkIjoyfQ.wvEGHyFtEt4oPZPHuhks7_RODSH2_vn19vKMvBbYTBY"
+}
+
+
+3.
+/homepage
+GET REQUEST:
+
+it just gives a http response "this is the homepage" to get the response you need to use the  put access_tokent on the vary_on_headers
+of the  request to get the response .
