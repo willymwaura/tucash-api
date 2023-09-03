@@ -42,5 +42,17 @@ to send request
 tucash-api-production.up.railway.app/homepage
 GET REQUEST:
 
-it just gives a http response "this is the homepage" to get the response you need to use the  put access_tokent on the vary_on_headers
+it just gives a http response "this is the homepage" to get the response you need to use the  put access_token on the on headers
 of the  request to get the response .
+
+4.tucash-api-production.up.railway.app/auth/api/token/refresh/
+POST REQUEST:
+example(you send the refresh token in this format)
+{
+    "refresh":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5MzgzMzIwOCwianRpIjoiNTc3NWQyM2ZiNmE3NDhlYzk1ZjJiOTg3ZmRhZjQzY2QiLCJ1c2VyX2lkIjoyfQ._QfnpMnOwxupaPHAIixkMBnEj8BZu3fiO-qcz4a7fCc"
+}
+
+and get this response(the refresh token which you will use send requests)
+{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjkzNzQ4NDc0LCJqdGkiOiJjNDlkZDBlYTMxMzQ0ZmNiYTAwYzJlOWYxNmQ5ZjNlNiIsInVzZXJfaWQiOjJ9.GWlfEnh1CJ3LgZzGJn8QlkgMyv37zXc47aw9YCxRGio"
+}

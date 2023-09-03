@@ -19,5 +19,5 @@ import requests
 @permission_classes([IsAuthenticated])
 
 
-def homepage():
+def homepage(request):
     return HttpResponse(" this is the homepage")
