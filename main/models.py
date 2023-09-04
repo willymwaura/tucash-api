@@ -25,5 +25,5 @@ class Transactions(models.Model):
         return str(self.amount)
     
 class Mpesa(models.Model):
-    Amount=models.IntegerField(null=True)
-    PhoneNumber=models.IntegerField()
+    Amount=models.IntegerField(blank=False)
+    PhoneNumber=models.IntegerField(blank=False)
