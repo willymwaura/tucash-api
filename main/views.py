@@ -22,7 +22,7 @@ from requests.auth import HTTPBasicAuth
 import json
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 
 
 def homepage(request):
