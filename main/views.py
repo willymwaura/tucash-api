@@ -15,18 +15,46 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import api_view, permission_classes
 import requests
 
-from main.models import Mpesa
-from main.serializers import Mpesaserializer
-from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
+from main.models import Mpesa,Balance,Transactions
+from authapp.models import CustomUser
+from main.serializers import Mpesaserializer,BalanceSerializer,TransactionSerializer
+#from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
 from requests.auth import HTTPBasicAuth
 import json
+from django.shortcuts import get_object_or_404
 
-@api_view(['GET'])
+
+
+import requests
+import json
+from requests.auth import HTTPBasicAuth
+from datetime import datetime
+import base64
+class MpesaC2bCredential:
+    consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
+    consumer_secret = 'ap7qAoVZ5hIL4ocx'
+    api_URL = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+class MpesaAccessToken:
+    r = requests.get(MpesaC2bCredential.api_URL,auth=HTTPBasicAuth(MpesaC2bCredential.consumer_key, MpesaC2bCredential.consumer_secret))
+    mpesa_access_token = json.loads(r.text)
+    validated_mpesa_access_token = mpesa_access_token['access_token']
+class LipanaMpesaPpassword:
+    lipa_time = datetime.now().strftime('%Y%m%d%H%M%S')
+    Business_short_code = "174379"
+    passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
+    data_to_encode = Business_short_code + passkey + lipa_time
+    online_password = base64.b64encode(data_to_encode.encode())
+    decode_password = online_password.decode('utf-8')
+
 #@permission_classes([IsAuthenticated])
 
 
-def homepage(request):
-    return HttpResponse(" this is the homepage")
+class Homepage(APIView):
+    def get(self, request):
+        return HttpResponse("This is the homepage")
+    
+
+
 
 class gettoken(APIView):
     def post(self,request):
@@ -37,19 +65,24 @@ class gettoken(APIView):
         mpesa_access_token = json.loads(r.text)
         validated_mpesa_access_token = mpesa_access_token['access_token']
         return HttpResponse(validated_mpesa_access_token)
-    
+ 
 class lipanampesa(APIView):
     def post(self,request):
         
-
+        print("starting")
+        print(request.data)
         serializer=Mpesaserializer(data=request.data)
+
         if serializer.is_valid():
             serializer.save()
+            print("saved")
+        else:
+            print("Validation Errors:", serializer.errors)
         
         
-        phone=Mpesa.objects.last().PhoneNumber
-        Amount=Mpesa.objects.last().Amount
-        Amount=Amount
+        phone=request.data["PhoneNumber"]
+        Amount=request.data["Amount"]
+        
         print(phone)
         access_token = MpesaAccessToken.validated_mpesa_access_token
         
@@ -65,47 +98,106 @@ class lipanampesa(APIView):
             "PartyA":phone,
             "PartyB": LipanaMpesaPpassword.Business_short_code,
             "PhoneNumber":phone,
-            "CallBackURL": "https://sandbox.safaricom.co.ke/mpesa/",
-            "AccountReference": "Art gallery software company",
+            "CallBackURL": "https://tucash-api-production.up.railway.app/callback/",
+            "AccountReference": "Tucash ",
             "TransactionDesc": "Testing stk push"
         }
         response = requests.post(api_url, json=request, headers=headers)
         return HttpResponse(response)
 
-@csrf_exempt
-def mpesa_callback(request):
-    if request.method == 'POST':
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.core.exceptions import ObjectDoesNotExist  # Import ObjectDoesNotExist
+
+class MpesaCallback(APIView):
+    def post(self,request):
         data = json.loads(request.body.decode('utf-8'))
 
         # Extract transaction data from JSON payload
-        print("transaction processing")
         transaction_id = data['TransactionID']
-        print(transaction_id)
         amount = int(data['TransAmount'])
-        print(amount)
-        phone_number = int(data['MSISDN'])
-        print(phone_number)
+        phone_number = data['MSISDN']  # Treat as a string, not an integer
         status = int(data['ResultCode'])
-        print(status)
         account_reference = data['BillRefNumber']
-        print(account_reference)
 
         # Check if transaction status is successful
         if status == 0:
-            print("checking if status is 0")
-            # Store transaction data in database
-            '''
-            payment = Payments.objects.create(
-                transaction_id=transaction_id,
-                amount=amount,
-                phone_number=phone_number,
-                status=status,
-                account_number=account_reference
-            )
-            payment.save()'''
-            print("saved")
+            try:
+                # Find the user in the CustomUser model with the same phone number
+                user = CustomUser.objects.get(phone_number=str(phone_number))
 
-        return HttpResponse(status=200)
-    else:
-        return HttpResponse(status=400)
+                # Update the balance model instance with the user's ID
+                try:
+                    balance_entry = Balance.objects.get(user_id=user.id)
+                    balance_entry.amount += amount
+                    balance_entry.save()
+                except ObjectDoesNotExist:
+                    # You may want to create a new balance entry for the user if it doesn't exist
+                    pass
+
+                # Transaction saved
+                return JsonResponse({'message': 'Transaction saved'}, status=200)
+
+            except CustomUser.DoesNotExist:
+                # User not found, you may want to handle this case accordingly
+                return JsonResponse({'error': 'User not found'}, status=404)
+
+        return JsonResponse({'message': 'Transaction received'}, status=200)  # Respond with 200 even if status is not 0
+
+    def get(self, request):
+        return JsonResponse({'error': 'Method not allowed'}, status=405)  # Handle GET requests with a 405 response
+
+class GetBalanceAPIView(APIView):
+    def get(self, request, user_id):
+        try:
+            balance_entry = Balance.objects.get(user_id=user_id)
+            serializer = BalanceSerializer(balance_entry)
+            return Response(serializer.data)
+        except Balance.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+class UpdateBalanceAPIView(APIView):
+    def post(self, request):
+        serializer = TransactionSerializer(data=request.data)
+
+        if serializer.is_valid():
+            sender_id = serializer.validated_data['sender_id']
+            receiver_phone_number = serializer.validated_data['receiver_phone_number']
+            amount = serializer.validated_data['amount']
+
+            try:
+                # Get the sender's balance
+                
+                sender_balance = Balance.objects.get(user_id=sender_id)
+
+                # Check if the sender has sufficient balance
+                if sender_balance.amount >= amount:
+                    # Deduct the amount from the sender's balance
+                    sender_balance.amount -= amount
+                    sender_balance.save()
+
+                    # Find the receiver by phone number
+                    receiver = CustomUser.objects.get(phone_number=receiver_phone_number)
+                    receiver = Balance.objects.get(user_id=receiver.id)
+
+                    # Update the receiver's balance by adding the amount
+                    receiver.amount += amount
+                    receiver.save()
+
+                    # Create a transaction record
+                    Transactions.objects.create(sender=sender_id, receiver=receiver_phone_number, amount=amount)
+
+                    return Response({'message': 'Transaction successful'}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
+            except (Balance.DoesNotExist, Transactions.DoesNotExist):
+                return Response({'error': 'Sender or receiver not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
 

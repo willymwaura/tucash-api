@@ -1,8 +1,10 @@
 tucash api documentation
-1.
-tucash-api-production.up.railway.app/auth/register/
 
-POST:creates a new user
+
+1.creating new users
+url:tucash-api-production.up.railway.app/auth/register/
+
+HTTP REQUEST :POST
 json 
 [
     {
@@ -17,10 +19,14 @@ json
 }
      
 ]
-2.
-tucash-api-production.up.railway.app/auth/login/
-POST :when you send the password and username of a created user you get token which you will use
-to send request
+NB:once the user is created ,,the backend set his tucash balance to zero.
+
+
+2.getting the tokens when a user is logging in
+url:tucash-api-production.up.railway.app/auth/login/
+HTTP REQUEST :POST 
+when you send the password and username of a created user you get token 
+which you will use to send request
  example this post request :
 
    {
@@ -32,22 +38,29 @@ to send request
 }
 
  gives you this :
+
  {
+    "id:2,# this is very important you will use it alot (its the id of the auntenticated user)
     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjkzNjcyMzM1LCJqdGkiOiIyOWVkNGM1NjdjNTk0OWVkODA5OWU3ZTYyMzhjMGViYiIsInVzZXJfaWQiOjJ9._hHi479FryDCwPe3XqB4NYoZt-xkvrnz1ZQJ_arFiNs",
     "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5Mzc1ODQzNSwianRpIjoiNTBjNzgwYjkyY2JlNDg2ZDlhMzkyZWM3ODBjNDVkZmYiLCJ1c2VyX2lkIjoyfQ.wvEGHyFtEt4oPZPHuhks7_RODSH2_vn19vKMvBbYTBY"
 }
 
 
-3.
-tucash-api-production.up.railway.app/homepage
-GET REQUEST:
 
-it just gives a http response "this is the homepage" to get the response you need to use the  put access_token on the on headers
+3.for testing if you can access protected url
+url: tucash-api-production.up.railway.app/homepage
+HTTP REQUEST :GET
+
+it just gives a http response "this is the homepage" to get the response 
+you need to use the  put access_token on the on headers
 of the  request to get the response .
 
-4.tucash-api-production.up.railway.app/auth/api/token/refresh/
-POST REQUEST:
-example(you send the refresh token in this format)
+
+
+4.for refreshing the auth token
+url:tucash-api-production.up.railway.app/auth/api/token/refresh/
+HTTP REQUEST :
+example(you send the refresh token in this format,the refresh token you got when user is loggin in)
 {
     "refresh":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5MzgzMzIwOCwianRpIjoiNTc3NWQyM2ZiNmE3NDhlYzk1ZjJiOTg3ZmRhZjQzY2QiLCJ1c2VyX2lkIjoyfQ._QfnpMnOwxupaPHAIixkMBnEj8BZu3fiO-qcz4a7fCc"
 }
@@ -56,3 +69,52 @@ and get this response(the refresh token which you will use send requests)
 {
     "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjkzNzQ4NDc0LCJqdGkiOiJjNDlkZDBlYTMxMzQ0ZmNiYTAwYzJlOWYxNmQ5ZjNlNiIsInVzZXJfaWQiOjJ9.GWlfEnh1CJ3LgZzGJn8QlkgMyv37zXc47aw9YCxRGio"
 }
+
+
+
+5. url for check the balance for a user
+
+HTTP REQUEST:GET
+
+URL:https://tucash-api-production.up.railway.app/get_balance/id/
+
+if id of the user is 5 the url will be :
+
+URL:https://tucash-api-production.up.railway.app/get_balance/5/
+
+you will get this response:
+{
+    "user_id": 5,
+    "amount": 200.0
+}
+
+
+
+6.deposit from mpesa account_number
+
+URL:https://tucash-api-production.up.railway.app/stkpush
+
+HTTP REQUEST:POST
+
+{
+    "PhoneNumber":"254112100378",
+    "Amount":1
+}
+once you post this to the stkpush url the user will get a prompt to enter the pin 
+and the rest i handle by the backend.
+
+
+
+7.transacting from tucash to tucash
+
+HTTP REQUEST:POST
+
+URL:https://tucash-api-production.up.railway.app/transact
+
+{
+    "sender_id":4,
+    "receiver_phone_number":"254112100378",
+    "amount":200
+}
+once you post the data to transact url ,,the money is set to the account 
+if the account holder has enough money

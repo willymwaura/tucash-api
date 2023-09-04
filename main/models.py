@@ -17,7 +17,7 @@ class Balance(models.Model):
     
 class Transactions(models.Model):
     sender = models.IntegerField(blank=False) 
-    receiver = models.IntegerField(blank=False) 
+    receiver = models.CharField(blank=False) 
     amount = models.FloatField(blank=False)
     datetime = models.DateTimeField(auto_now_add=True,blank=False)
 
@@ -25,5 +25,5 @@ class Transactions(models.Model):
         return str(self.amount)
     
 class Mpesa(models.Model):
-    Amount=models.IntegerField(blank=False)
-    PhoneNumber=models.IntegerField(blank=False)
+    Amount=models.IntegerField(blank=False,default=0)
+    PhoneNumber=models.CharField(blank=False,default=3,max_length=12)
