@@ -41,6 +41,7 @@ which you will use to send request
 
  {
     "id:2,# this is very important you will use it alot (its the id of the auntenticated user)
+     "PhoneNumber": "1234567890",
     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjkzNjcyMzM1LCJqdGkiOiIyOWVkNGM1NjdjNTk0OWVkODA5OWU3ZTYyMzhjMGViYiIsInVzZXJfaWQiOjJ9._hHi479FryDCwPe3XqB4NYoZt-xkvrnz1ZQJ_arFiNs",
     "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5Mzc1ODQzNSwianRpIjoiNTBjNzgwYjkyY2JlNDg2ZDlhMzkyZWM3ODBjNDVkZmYiLCJ1c2VyX2lkIjoyfQ.wvEGHyFtEt4oPZPHuhks7_RODSH2_vn19vKMvBbYTBY"
 }
@@ -97,7 +98,7 @@ URL:https://tucash-api-production.up.railway.app/stkpush
 HTTP REQUEST:POST
 
 {
-    "PhoneNumber":"254112100378",
+    "PhoneNumber":"254112100378",(phone number of the account holder)
     "Amount":1
 }
 once you post this to the stkpush url the user will get a prompt to enter the pin 
