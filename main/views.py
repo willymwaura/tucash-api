@@ -113,13 +113,14 @@ from django.core.exceptions import ObjectDoesNotExist  # Import ObjectDoesNotExi
 class MpesaCallback(APIView):
     def post(self,request):
         data = json.loads(request.body.decode('utf-8'))
+        print("call back running")
 
         # Extract transaction data from JSON payload
-        transaction_id = data['TransactionID']
+        #transaction_id = data['TransactionID']
         amount = int(data['TransAmount'])
         phone_number = data['MSISDN']  # Treat as a string, not an integer
         status = int(data['ResultCode'])
-        account_reference = data['BillRefNumber']
+        #account_reference = data['BillRefNumber']
 
         # Check if transaction status is successful
         if status == 0:
