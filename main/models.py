@@ -23,3 +23,7 @@ class Transactions(models.Model):
 
     def __str__(self):
         return str(self.amount)
+    
+class Mpesa(models.Model):
+    Amount=models.IntegerField(null=True)
+    PhoneNumber=models.IntegerField()
