@@ -47,9 +47,11 @@ class UserLoginAPIView(APIView):
                 print(str(refresh.access_token))
                 print(str(refresh))
                 user_id = user.id
+                tel_number=user.phone_number
                 
                 return Response({
                     'id':user_id,
+                    "PhoneNumber":tel_number,
                     'access_token': str(refresh.access_token),
                     'refresh_token': str(refresh)
                 })
