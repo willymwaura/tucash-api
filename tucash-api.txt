@@ -119,3 +119,52 @@ URL:https://tucash-api-production.up.railway.app/transact
 }
 once you post the data to transact url ,,the money is set to the account 
 if the account holder has enough money
+
+
+NB:This is for the backend you dont have to know this
+8. once phone number and amount is post to /stkpush you get this response
+
+{
+"MerchantRequestID":"29585-256375773-1",
+"CheckoutRequestID":"ws_CO_06092023102953222112100378",
+"ResponseCode": "0",
+"ResponseDescription":"Success. Request accepted for processing",
+"CustomerMessage":"Success. Request accepted for processing"
+}
+
+then stkpush sends this response to the /callback/
+
+{
+    "Body": {
+        "stkCallback": {
+            "MerchantRequestID": "29585-256375773-1",
+            "CheckoutRequestID": "ws_CO_06092023102953222112100378",
+            "ResultCode": 0,
+            "ResultDesc": "The service request is processed successfully.",
+            "CallbackMetadata": {
+                "Item": [
+                    {
+                        "Name": "Amount",
+                        "Value": 2.0
+                    },
+                    {
+                        "Name": "MpesaReceiptNumber",
+                        "Value": "RI681PIVV2"
+                    },
+                    {
+                        "Name": "Balance"
+                    },
+                    {
+                        "Name": "TransactionDate",
+                        "Value": 20230906102748
+                    },
+                    {
+                        "Name": "PhoneNumber",
+                        "Value": 254112100378
+                    }
+                ]
+            }
+        }
+    }
+}
+which you use to do your logic

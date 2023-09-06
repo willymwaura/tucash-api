@@ -118,10 +118,14 @@ class MpesaCallback(APIView):
 
         # Extract transaction data from JSON payload
         #transaction_id = data['TransactionID']
-        amount = int(data['TransAmount'])
-        phone_number = data['MSISDN']  # Treat as a string, not an integer
-        status = int(data['ResultCode'])
+        callback_data = data.get('Body', {}).get('stkCallback', {})
+        amount = int(callback_data.get('CallbackMetadata', {}).get('Item', [])[0].get('Value'))
+        phone_number = callback_data.get('CallbackMetadata', {}).get('Item', [])[4].get('Value')# Treat as a string, not an integer
+        status = int(callback_data.get('ResultCode'))
         #account_reference = data['BillRefNumber']
+        print(f"ResultCode: {status}")
+        print(f"Amount: {amount}")
+        print(f"PhoneNumber: {phone_number}")
 
         # Check if transaction status is successful
         if status == 0:
