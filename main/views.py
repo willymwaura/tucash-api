@@ -114,6 +114,7 @@ class MpesaCallback(APIView):
     def post(self,request):
         data = json.loads(request.body.decode('utf-8'))
         print("call back running")
+        print(data)
 
         # Extract transaction data from JSON payload
         #transaction_id = data['TransactionID']
