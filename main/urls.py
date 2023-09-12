@@ -1,9 +1,9 @@
 from django.urls import path
 
-from . import views
+from . views import Homepage
 from main.views import Homepage,gettoken,lipanampesa,UpdateBalanceAPIView ,GetBalanceAPIView,MpesaCallback
 
-from .views import *
+
 
 urlpatterns=[
   

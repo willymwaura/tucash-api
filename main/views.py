@@ -18,40 +18,18 @@ import requests
 from main.models import Mpesa,Balance,Transactions
 from authapp.models import CustomUser
 from main.serializers import Mpesaserializer,BalanceSerializer,TransactionSerializer
-#from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
+
 from requests.auth import HTTPBasicAuth
 import json
 from django.shortcuts import get_object_or_404
 
 
 
-import requests
-import json
-from requests.auth import HTTPBasicAuth
-from datetime import datetime
-import base64
-class MpesaC2bCredential:
-    consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
-    consumer_secret = 'ap7qAoVZ5hIL4ocx'
-    api_URL = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-class MpesaAccessToken:
-    r = requests.get(MpesaC2bCredential.api_URL,auth=HTTPBasicAuth(MpesaC2bCredential.consumer_key, MpesaC2bCredential.consumer_secret))
-    mpesa_access_token = json.loads(r.text)
-    validated_mpesa_access_token = mpesa_access_token['access_token']
-class LipanaMpesaPpassword:
-    lipa_time = datetime.now().strftime('%Y%m%d%H%M%S')
-    Business_short_code = "174379"
-    passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
-    data_to_encode = Business_short_code + passkey + lipa_time
-    online_password = base64.b64encode(data_to_encode.encode())
-    decode_password = online_password.decode('utf-8')
-
-#@permission_classes([IsAuthenticated])
-
-
 class Homepage(APIView):
     def get(self, request):
         return HttpResponse("This is the homepage")
+    
+    
     
 
 
@@ -65,9 +43,11 @@ class gettoken(APIView):
         mpesa_access_token = json.loads(r.text)
         validated_mpesa_access_token = mpesa_access_token['access_token']
         return HttpResponse(validated_mpesa_access_token)
- 
+from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
 class lipanampesa(APIView):
+    
     def post(self,request):
+        #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
         
         print("starting")
         print(request.data)
