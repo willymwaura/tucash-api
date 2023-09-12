@@ -136,6 +136,7 @@ class MpesaCallback(APIView):
 
 class GetBalanceAPIView(APIView):
     def get(self, request, user_id):
+        print(" the id passed is ",user_id)
         try:
             balance_entry = Balance.objects.get(user_id=user_id)
             serializer = BalanceSerializer(balance_entry)
