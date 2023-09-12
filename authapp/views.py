@@ -17,6 +17,8 @@ from main.models import Balance
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
+    print("creating a user")
+    print(request.data)
     serializer = CustomUserSerializer(data=request.data)
     if serializer.is_valid():
         user=serializer.save()
