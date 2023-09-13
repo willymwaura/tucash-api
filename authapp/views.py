@@ -23,7 +23,11 @@ def register_user(request):
     if serializer.is_valid():
         user=serializer.save()
         Balance.objects.create(user_id=user.id, amount=0)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        response_data = {
+            "message": "User created successfully",
+            "user": serializer.data  # You can include user data in the response if needed
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 from rest_framework.permissions import AllowAny
