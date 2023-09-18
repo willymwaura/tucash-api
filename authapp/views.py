@@ -13,6 +13,7 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from main.models import Balance
+from authapp.models import CustomUser
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -64,3 +65,20 @@ class UserLoginAPIView(APIView):
             else:
                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def reset_password(request):
+    user_id = request.data.get('user_id')
+    new_password = request.data.get('new_password')
+
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Hash the new password
+    hashed_password = make_password(new_password)
+    user.password = hashed_password
+    user.save()
+
+    return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)

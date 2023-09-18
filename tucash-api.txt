@@ -12,9 +12,9 @@ json
     "first_name": "John",
     "second_name": "Doe",
     "third_name": "Moses",
-    "phone_number": "1234567890",
+    "phone_number": "1234567890",(should be unique)
     "timestamp": "2023-09-02T12:34:56.789Z",
-    "id_number": "1234567",
+    "id_number": "1234567",(should be unique)
     "password":"1234willy"
 }
      
@@ -45,7 +45,6 @@ which you will use to send request
     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjkzNjcyMzM1LCJqdGkiOiIyOWVkNGM1NjdjNTk0OWVkODA5OWU3ZTYyMzhjMGViYiIsInVzZXJfaWQiOjJ9._hHi479FryDCwPe3XqB4NYoZt-xkvrnz1ZQJ_arFiNs",
     "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY5Mzc1ODQzNSwianRpIjoiNTBjNzgwYjkyY2JlNDg2ZDlhMzkyZWM3ODBjNDVkZmYiLCJ1c2VyX2lkIjoyfQ.wvEGHyFtEt4oPZPHuhks7_RODSH2_vn19vKMvBbYTBY"
 }
-
 
 
 3.for testing if you can access protected url

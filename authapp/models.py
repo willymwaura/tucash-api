@@ -30,8 +30,8 @@ class CustomUser(AbstractBaseUser):
     first_name = models.CharField(max_length=30,default="john")
     second_name = models.CharField(max_length=30, default="john")
     third_name = models.CharField(max_length=30, default="moses")
-    phone_number = models.CharField(max_length=12, default="25411223344")
-    id_number = models.CharField(max_length=10, default="20202020")
+    phone_number = models.CharField(max_length=12, default="25411223344",unique=True)
+    id_number = models.CharField(max_length=10, default="20202020",unique=True)
 
     
 

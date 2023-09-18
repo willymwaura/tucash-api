@@ -1,14 +1,15 @@
 
 from rest_framework import serializers
 from . models import Mpesa
+from .models import Balance
 
 class Mpesaserializer(serializers.ModelSerializer):
     class Meta:
         model=Mpesa
-        fields='__all__'
+        fields=['Amount','PhoneNumber']
 
 
-from .models import Balance
+
 
 class BalanceSerializer(serializers.ModelSerializer):
     class Meta:

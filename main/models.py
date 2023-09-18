@@ -1,7 +1,5 @@
 from django.db import models
-from datetime import datetime
-
-from pytz import timezone
+from django.utils import timezone
 
 # Create your models here.
 
@@ -27,3 +25,20 @@ class Transactions(models.Model):
 class Mpesa(models.Model):
     Amount=models.IntegerField(blank=False,default=0)
     PhoneNumber=models.CharField(blank=False,default=3,max_length=12)
+    datetime=models.DateTimeField(blank=False,default=timezone.now)
+    status=models.BooleanField(default=False)
+
+class PaybillTranscations(models.Model):
+    paybill=models.IntegerField(blank=False,default=0)
+    account_number=models.CharField(blank=False,default=3)
+    amount=models.IntegerField(blank=False,default=0)
+    datetime=models.DateTimeField(auto_now_add=True,blank=False)
+    status=models.BooleanField(default=False,blank=False)
+    transaction_id=models.CharField(max_length=30,default=111,blank=False)
+
+class TillTranscations(models.Model):
+    till_number=models.IntegerField(blank=False,default=0)
+    amount=models.IntegerField(blank=False,default=0)
+    datetime=models.DateTimeField(auto_now_add=True,blank=False)
+    status=models.BooleanField(default=False)
+    transaction_id=models.CharField(max_length=30,default=111,blank=False)
