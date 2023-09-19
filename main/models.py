@@ -34,11 +34,11 @@ class PaybillTranscations(models.Model):
     amount=models.IntegerField(blank=False,default=0)
     datetime=models.DateTimeField(auto_now_add=True,blank=False)
     status=models.BooleanField(default=False,blank=False)
-    transaction_id=models.CharField(max_length=30,default=111,blank=False)
+    OriginatorConversationID=models.CharField(max_length=30,default=111,blank=False)
 
 class TillTranscations(models.Model):
     till_number=models.IntegerField(blank=False,default=0)
     amount=models.IntegerField(blank=False,default=0)
     datetime=models.DateTimeField(auto_now_add=True,blank=False)
     status=models.BooleanField(default=False)
-    transaction_id=models.CharField(max_length=30,default=111,blank=False)
+    OriginatorConversationID=models.CharField(max_length=30,default=111,blank=False)

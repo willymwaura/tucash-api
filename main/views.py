@@ -194,53 +194,6 @@ class UpdateBalanceAPIView(APIView):
                 return Response({'error': 'Sender or receiver not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-
-from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken
-class paybill_transactions(APIView):
-    
-    def post(self,request):
-        #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
-        
-        print("starting")
-        '''
-        print(request.data)
-        serializer=Mpesaserializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            print("saved")
-        else:
-            print("Validation Errors:", serializer.errors)
-        
-        
-        phone=request.data["PhoneNumber"]
-        Amount=request.data["Amount"]
-        
-        print(phone)'''
-        access_token = MpesaAccessToken.validated_mpesa_access_token
-        
-
-        api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
-        headers = {"Authorization": "Bearer %s" % access_token}
-        request = { 
-        "Initiator":"API_Usename",
-        "SecurityCredential":LipanaMpesaPpassword.decode_password,
-        "CommandID": "BusinessPayBill",
-        "SenderIdentifierType": "4",
-        "RecieverIdentifierType":"4",
-        "Amount":"239",
-        "PartyA":LipanaMpesaPpassword.Business_short_code,
-        "PartyB":"570777",#the paybill where money is being sent 
-        "AccountReference":"254112100378",
-        "Requester":"254700000000",
-        "Remarks":"OK",
-        "QueueTimeOutURL":"https://tucash-api-production.up.railway.app/callback/",
-        "ResultURL":"https://tucash-api-production.up.railway.app/callback/",
-        }
-        
-        response = requests.post(api_url, json=request, headers=headers)
-        return HttpResponse(response)
     
 
 from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken
@@ -347,7 +300,7 @@ class PaybillCallbackView(View):
             # Extract relevant information from the JSON data
             result_code = data["Result"]["ResultCode"]
             transaction_amount = data["TransactionAmount"]
-            transaction_id = data["TransactionID"]
+            OriginatorConversationID = data["OriginatorConversationID"]
 
             # Save the extracted information to your database or perform other actions
             # For example, you can use Django models to save data to your database.
