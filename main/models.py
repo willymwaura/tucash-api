@@ -13,7 +13,7 @@ class Balance(models.Model):
     def __str__(self):
         return str(self.amount)
     
-class Transactions(models.Model):
+class TucashTransactions(models.Model):
     sender = models.IntegerField(blank=False) 
     receiver = models.CharField(blank=False) 
     amount = models.FloatField(blank=False)
@@ -22,7 +22,7 @@ class Transactions(models.Model):
     def __str__(self):
         return str(self.amount)
     
-class Mpesa(models.Model):
+class MpesaDeposits(models.Model):
     Amount=models.IntegerField(blank=False,default=0)
     PhoneNumber=models.CharField(blank=False,default=3,max_length=12)
     datetime=models.DateTimeField(blank=False,default=timezone.now)

@@ -5,6 +5,7 @@ from rest_framework import serializers,status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist 
 
 from rest_framework.status import HTTP_204_NO_CONTENT
 from rest_framework.decorators import permission_classes
@@ -15,9 +16,9 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import api_view, permission_classes
 import requests
 
-from main.models import Mpesa,Balance,Transactions
+from main.models import TillTranscations,Balance,MpesaDeposits,PaybillTranscations,TucashTransactions
 from authapp.models import CustomUser
-from main.serializers import Mpesaserializer,BalanceSerializer,TransactionSerializer
+from main.serializers import Mpesaserializer,BalanceSerializer,TransactionSerializer,TillSerializer,PaybillSerializer
 
 from requests.auth import HTTPBasicAuth
 import json
@@ -49,7 +50,7 @@ class lipanampesa(APIView):
     def post(self,request):
         #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
         
-        print("starting")
+        print("starting the stkpush")
         print(request.data)
         serializer=Mpesaserializer(data=request.data)
 
@@ -85,10 +86,7 @@ class lipanampesa(APIView):
         response = requests.post(api_url, json=request, headers=headers)
         return HttpResponse(response)
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from django.core.exceptions import ObjectDoesNotExist  # Import ObjectDoesNotExist
+
 
 class MpesaCallback(APIView):
     def post(self,request):
@@ -120,6 +118,8 @@ class MpesaCallback(APIView):
                     balance_entry = Balance.objects.get(user_id=user.id)
                     balance_entry.amount += amount
                     balance_entry.save()
+                    transaction=MpesaDeposits(amount=amount,honeNumber=phone_number,status=True)
+                    transaction.save()
                 except ObjectDoesNotExist:
                     # You may want to create a new balance entry for the user if it doesn't exist
                     pass
@@ -139,6 +139,8 @@ class MpesaCallback(APIView):
             print("status 1013")
             print(amount)
             print(phone_number)
+            transaction=MpesaDeposits(amount=amount,honeNumber=phone_number)
+            transaction.save()
             #logic to save the transaction
             return JsonResponse({'message':'stk response but not successful deposit'})
             
@@ -185,12 +187,12 @@ class UpdateBalanceAPIView(APIView):
                     receiver.save()
 
                     # Create a transaction record
-                    Transactions.objects.create(sender=sender_id, receiver=receiver_phone_number, amount=amount)
+                    TucashTransactions.objects.create(sender=sender_id, receiver=receiver_phone_number, amount=amount)
 
                     return Response({'message': 'Transaction successful'}, status=status.HTTP_200_OK)
                 else:
                     return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
-            except (Balance.DoesNotExist, Transactions.DoesNotExist):
+            except (Balance.DoesNotExist, TucashTransactions.DoesNotExist):
                 return Response({'error': 'Sender or receiver not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -200,12 +202,12 @@ from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken
 class paybill_transactions(APIView):
     
     def post(self,request):
-        #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
+        #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken
         
-        print("starting")
-        '''
+        print("lipa to paybill starting")
+        
         print(request.data)
-        serializer=Mpesaserializer(data=request.data)
+        serializer=PaybillSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -214,10 +216,11 @@ class paybill_transactions(APIView):
             print("Validation Errors:", serializer.errors)
         
         
-        phone=request.data["PhoneNumber"]
-        Amount=request.data["Amount"]
+        paybill=request.data["paybill"]
+        Amount=request.data["amount"]
+        account_number=request.data["account_number"]
         
-        print(phone)'''
+        
         access_token = MpesaAccessToken.validated_mpesa_access_token
         
 
@@ -229,17 +232,29 @@ class paybill_transactions(APIView):
         "CommandID": "BusinessPayBill",
         "SenderIdentifierType": "4",
         "RecieverIdentifierType":"4",
-        "Amount":"239",
+        "Amount":Amount,
         "PartyA":LipanaMpesaPpassword.Business_short_code,
-        "PartyB":"570777",#the paybill where money is being sent 
-        "AccountReference":"254112100378",
-        "Requester":"254700000000",
+        "PartyB":paybill,#the paybill where money is being sent 
+        "AccountReference":account_number,
+        "Requester":"254700000000",#the mobile number used to register the paybill
         "Remarks":"OK",
         "QueueTimeOutURL":"https://tucash-api-production.up.railway.app/callback/",
         "ResultURL":"https://tucash-api-production.up.railway.app/paybill_callback/",
         }
         
         response = requests.post(api_url, json=request, headers=headers)
+        if response.headers.get('content-type') == 'application/json':
+            try:
+                response_json = response.json()
+                originator_conversation_id = response_json.get('OriginatorConversationID')
+                
+                # Check if OriginatorConversationID is present in the response
+                if originator_conversation_id:
+                    paybill_transaction=PaybillTranscations(paybill=paybill,amount=Amount,OriginatorConversationID=originator_conversation_id,account_number=account_number)
+                    paybill_transaction.save()
+            except ValueError:
+                # Handle JSON parsing error if the response is not valid JSON
+                print("Error: Response is not valid JSON.")
         return HttpResponse(response)
 
 class till_transactions(APIView):
@@ -247,10 +262,10 @@ class till_transactions(APIView):
     def post(self,request):
         #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
         
-        print("starting")
-        '''
+        print("starting paybill to till transaction")
+        
         print(request.data)
-        serializer=Mpesaserializer(data=request.data)
+        serializer=TillSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -259,10 +274,10 @@ class till_transactions(APIView):
             print("Validation Errors:", serializer.errors)
         
         
-        phone=request.data["PhoneNumber"]
-        Amount=request.data["Amount"]
+        till=request.data["till_number"]
+        amount=request.data["amount"]
         
-        print(phone)'''
+        
         access_token = MpesaAccessToken.validated_mpesa_access_token
         
 
@@ -272,9 +287,9 @@ class till_transactions(APIView):
             "InitiatorName": "API_Username",
             "SecurityCredential": LipanaMpesaPpassword.decode_password,
             "CommandID": "BusinessPayment",
-            "Amount": "239",  # Change this to the desired amount for the transaction
+            "Amount": amount,  # Change this to the desired amount for the transaction
             "PartyA": LipanaMpesaPpassword.Business_short_code,
-            "PartyB": "570777",  # Change this to the Till number where money is being sent
+            "PartyB": till,  # Change this to the Till number where money is being sent
             "Remarks": "Payment to Till",
             "QueueTimeOutURL": "https://tucash-api-production.up.railway.app/callback/",
             "ResultURL": "https://tucash-api-production.up.railway.app/paybill_callback/",
@@ -282,6 +297,18 @@ class till_transactions(APIView):
         }
         
         response = requests.post(api_url, json=request, headers=headers)
+        if response.headers.get('content-type') == 'application/json':
+            try:
+                response_json = response.json()
+                originator_conversation_id = response_json.get('OriginatorConversationID')
+                
+                # Check if OriginatorConversationID is present in the response
+                if originator_conversation_id:
+                    till_transaction=PaybillTranscations(till=till,amount=amount,OriginatorConversationID=originator_conversation_id)
+                    till_transaction.save()
+            except ValueError:
+                # Handle JSON parsing error if the response is not valid JSON
+                print("Error: Response is not valid JSON.")
         return HttpResponse(response)
     
 from django.http import JsonResponse
@@ -303,16 +330,56 @@ class PaybillCallbackView(View):
             OriginatorConversationID = data["OriginatorConversationID"]
 
             # Save the extracted information to your database or perform other actions
+            if result_code== 0:
+                paybill_transaction=PaybillTranscations.objects.filter(OriginatorConversationID=OriginatorConversationID)
+                paybill_transaction=paybill_transaction(status=True)
+                paybill_transaction.save()
             # For example, you can use Django models to save data to your database.
 
             # Respond to the callback with a success message
-            response_data = {"message": "Callback received and data saved successfully"}
-            return JsonResponse(response_data, status=200)
+                response_data = {"message": "Callback received and data saved successfully"}
+                return JsonResponse(response_data, status=200)
+            else:
+                response_data = {"message": "Callback received and but the transaction was not  successfu"}
+                return JsonResponse(response_data, status=200)
+
         except Exception as e:
             # Handle any exceptions that may occur during processing
             error_response = {"error": str(e)}
             return JsonResponse(error_response, status=500)
+        
+class TillCallbackView(View):
 
+    def post(self, request):
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body.decode('utf-8'))
+
+            # Extract relevant information from the JSON data
+            result_code = data["Result"]["ResultCode"]
+            transaction_amount = data["TransactionAmount"]
+            OriginatorConversationID = data["OriginatorConversationID"]
+
+            # Save the extracted information to your database or perform other actions
+            # For example, you can use Django models to save data to your database.
+
+            # Respond to the callback with a success message
+            if result_code== 0:
+                till_transaction=TillTranscations.objects.filter(OriginatorConversationID=OriginatorConversationID)
+                till_transaction=till_transaction(status=True)
+                till_transaction.save()
+            # For example, you can use Django models to save data to your database.
+
+            # Respond to the callback with a success message
+                response_data = {"message": "Callback for till received and data saved successfully"}
+                return JsonResponse(response_data, status=200)
+            else:
+                response_data = {"message": "Callback for till received and but the transaction was not  successfu"}
+                return JsonResponse(response_data, status=200)
+        except Exception as e:
+            # Handle any exceptions that may occur during processing
+            error_response = {"error": str(e)}
+            return JsonResponse(error_response, status=500)
 
 
 

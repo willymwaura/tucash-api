@@ -1,11 +1,11 @@
 
 from rest_framework import serializers
-from . models import Mpesa
-from .models import Balance
+from . models import MpesaDeposits
+from .models import Balance,PaybillTranscations,TillTranscations
 
 class Mpesaserializer(serializers.ModelSerializer):
     class Meta:
-        model=Mpesa
+        model=MpesaDeposits
         fields=['Amount','PhoneNumber']
 
 
@@ -21,5 +21,14 @@ class TransactionSerializer(serializers.Serializer):
     sender_id = serializers.IntegerField()
     receiver_phone_number = serializers.CharField()
     amount = serializers.FloatField()
+
+class PaybillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaybillTranscations
+        fields = ['paybill', 'account_number','amount']
+class TillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TillTranscations
+        fields = ['till_number', 'amount']
 
 

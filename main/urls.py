@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . views import Homepage
-from main.views import Homepage,gettoken,lipanampesa,UpdateBalanceAPIView ,GetBalanceAPIView,MpesaCallback,paybill_transactions,PaybillCallbackView
+from main.views import Homepage,gettoken,lipanampesa,UpdateBalanceAPIView ,GetBalanceAPIView,MpesaCallback,paybill_transactions,PaybillCallbackView,TillCallbackView
 
 
 
@@ -18,5 +18,6 @@ urlpatterns=[
      path('paybill_transactions/',paybill_transactions.as_view()) ,
      path('till_transactions/',paybill_transactions.as_view()),
      path('paybill_callback/',PaybillCallbackView.as_view()),
+     path('till_callback/',TillCallbackView.as_view()),
 ]
 
