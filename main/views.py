@@ -71,9 +71,9 @@ class lipanampesa(APIView):
         gettoken_url = "https://tucash-api-production.up.railway.app/gettoken/"
 
         # Make a GET request to the gettoken view
-        access_token= requests.get(gettoken_url)
-        access_token=access_token.text
-        print("the token is ",access_token)
+        #access_token= requests.get(gettoken_url)
+        #access_token=access_token.text
+        #print("the token is ",access_token)
         #access_token = MpesaAccessToken.validated_mpesa_access_token
         
 
