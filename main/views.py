@@ -167,7 +167,7 @@ class MpesaCallback(APIView):
                     balance_entry = Balance.objects.get(user_id=user.id)
                     balance_entry.amount += amount
                     balance_entry.save()
-                    transaction=MpesaDeposits(amount=amount,honeNumber=phone_number,status=True)
+                    transaction=MpesaDeposits(amount=amount,PhoneNumber=phone_number,status=True)
                     transaction.save()
                 except ObjectDoesNotExist:
                     # You may want to create a new balance entry for the user if it doesn't exist
