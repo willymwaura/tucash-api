@@ -7,6 +7,10 @@ from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist 
 from django.urls import reverse
+from datetime import datetime, timedelta
+import time 
+
+import threading
 
 from rest_framework.status import HTTP_204_NO_CONTENT
 from rest_framework.decorators import permission_classes
@@ -36,17 +40,51 @@ class Homepage(APIView):
 
 
 
-class gettoken(APIView):
-    def get(self,request):
-        consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
-        consumer_secret = 'ap7qAoVZ5hIL4ocx'
-        api_URL = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-        r = requests.get(api_URL, auth=HTTPBasicAuth(consumer_key, consumer_secret))
+class TokenManager:
+    def __init__(self):
+        self.access_token = None
+        self.token_expiration_time = None
+        self.consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
+        self.consumer_secret = 'ap7qAoVZ5hIL4ocx'
+        self.api_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+        self.lock = threading.Lock()
+        
+        # Start a thread to automatically renew the token before it expires
+        renewal_thread = threading.Thread(target=self.auto_renew_token)
+        renewal_thread.daemon = True
+        renewal_thread.start()
+
+    def get_access_token(self):
+        with self.lock:
+            if self.access_token is None or datetime.now() >= self.token_expiration_time:
+                self.fetch_new_token()
+            return self.access_token
+
+    def fetch_new_token(self):
+        r = requests.get(self.api_url, auth=HTTPBasicAuth(self.consumer_key, self.consumer_secret))
         mpesa_access_token = json.loads(r.text)
-        print(mpesa_access_token)
-        validated_mpesa_access_token = mpesa_access_token['access_token']
-        print(validated_mpesa_access_token)
-        return HttpResponse(validated_mpesa_access_token)
+        self.access_token = mpesa_access_token.get('access_token')
+        expires_in = mpesa_access_token.get('expires_in')
+
+        if self.access_token and expires_in:
+            self.token_expiration_time = datetime.now() + timedelta(seconds=expires_in)
+
+    def auto_renew_token(self):
+        while True:
+            # Sleep for a period slightly shorter than the token expiration time
+            sleep_duration = (self.token_expiration_time - datetime.now() - timedelta(seconds=10)).total_seconds()
+            if sleep_duration > 0:
+                time.sleep(sleep_duration)
+            
+            # Renew the token
+            self.fetch_new_token()
+
+class GetToken(APIView):
+    token_manager = TokenManager()
+
+    def get(self, request):
+        access_token = self.token_manager.get_access_token()
+        return HttpResponse(access_token)
 from  main.mpesa_credentials import LipanaMpesaPpassword 
 class lipanampesa(APIView):
     
@@ -71,14 +109,14 @@ class lipanampesa(APIView):
         gettoken_url = "https://tucash-api-production.up.railway.app/gettoken/"
 
         # Make a GET request to the gettoken view
-        #access_token= requests.get(gettoken_url)
-        #access_token=access_token.text
-        #print("the token is ",access_token)
+        access_token= requests.get(gettoken_url)
+        access_token=access_token.text
+        print("the token is ",access_token)
         #access_token = MpesaAccessToken.validated_mpesa_access_token
         
 
         api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-        headers = {"Authorization": "Bearer %s" % "IBjh1DIXHQyhiG5hPycjAUOO3bU0"}
+        headers = {"Authorization": "Bearer %s" % access_token}
         request = {
             "BusinessShortCode": LipanaMpesaPpassword.Business_short_code,
             "Password": LipanaMpesaPpassword.decode_password,
