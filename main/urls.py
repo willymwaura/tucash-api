@@ -19,5 +19,6 @@ urlpatterns=[
      path('till_transactions/',paybill_transactions.as_view()),
      path('paybill_callback/',PaybillCallbackView.as_view()),
      path('till_callback/',TillCallbackView.as_view()),
+     path('gettoken/',gettoken.as_view(),name='gettoken'),
 ]
 

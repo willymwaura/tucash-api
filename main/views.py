@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist 
+from django.urls import reverse
 
 from rest_framework.status import HTTP_204_NO_CONTENT
 from rest_framework.decorators import permission_classes
@@ -36,15 +37,17 @@ class Homepage(APIView):
 
 
 class gettoken(APIView):
-    def post(self,request):
-        consumer_key = 'bdABIHJcBQA5ki4tRYQumvcLA8QaaDP3'
-        consumer_secret = 'QooVaV2gUsBcKziE'
+    def get(self,request):
+        consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
+        consumer_secret = 'ap7qAoVZ5hIL4ocx'
         api_URL = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
         r = requests.get(api_URL, auth=HTTPBasicAuth(consumer_key, consumer_secret))
         mpesa_access_token = json.loads(r.text)
+        print(mpesa_access_token)
         validated_mpesa_access_token = mpesa_access_token['access_token']
+        print(validated_mpesa_access_token)
         return HttpResponse(validated_mpesa_access_token)
-from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
+from  main.mpesa_credentials import LipanaMpesaPpassword 
 class lipanampesa(APIView):
     
     def post(self,request):
@@ -65,7 +68,13 @@ class lipanampesa(APIView):
         Amount=request.data["Amount"]
         
         print(phone)
-        access_token = MpesaAccessToken.validated_mpesa_access_token
+        gettoken_url = "https://tucash-api-production.up.railway.app/gettoken/"
+
+        # Make a GET request to the gettoken view
+        access_token= requests.get(gettoken_url)
+        access_token=access_token.text
+        print("the token is ",access_token)
+        #access_token = MpesaAccessToken.validated_mpesa_access_token
         
 
         api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
@@ -198,7 +207,7 @@ class UpdateBalanceAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken
+from  main.mpesa_credentials import LipanaMpesaPpassword
 class paybill_transactions(APIView):
     
     def post(self,request):
@@ -219,9 +228,14 @@ class paybill_transactions(APIView):
         paybill=request.data["paybill"]
         Amount=request.data["amount"]
         account_number=request.data["account_number"]
+        gettoken_url = "https://tucash-api-production.up.railway.app/gettoken/"
+
+        # Make a GET request to the gettoken view
+        access_token= requests.get(gettoken_url)
+        access_token=access_token.text
         
         
-        access_token = MpesaAccessToken.validated_mpesa_access_token
+        #access_token = MpesaAccessToken.validated_mpesa_access_token
         
 
         api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
@@ -278,7 +292,12 @@ class till_transactions(APIView):
         amount=request.data["amount"]
         
         
-        access_token = MpesaAccessToken.validated_mpesa_access_token
+        #access_token = MpesaAccessToken.validated_mpesa_access_token
+        gettoken_url = "https://tucash-api-production.up.railway.app/gettoken/"
+
+        # Make a GET request to the gettoken view
+        access_token= requests.get(gettoken_url)
+        access_token=access_token.text
         
 
         api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"

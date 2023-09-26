@@ -4,6 +4,7 @@ import json
 from requests.auth import HTTPBasicAuth
 from datetime import datetime
 import base64
+'''
 
 class MpesaC2bCredential:
     consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
@@ -12,7 +13,8 @@ class MpesaC2bCredential:
 class MpesaAccessToken:
     r = requests.get(MpesaC2bCredential.api_URL,auth=HTTPBasicAuth(MpesaC2bCredential.consumer_key, MpesaC2bCredential.consumer_secret))
     mpesa_access_token = json.loads(r.text)
-    validated_mpesa_access_token = mpesa_access_token['access_token']
+    print(mpesa_access_token)
+    validated_mpesa_access_token = mpesa_access_token['access_token']'''
 class LipanaMpesaPpassword:
     lipa_time = datetime.now().strftime('%Y%m%d%H%M%S')
     Business_short_code = "174379"
