@@ -43,7 +43,7 @@ class Homepage(APIView):
 class TokenManager:
     def __init__(self):
         self.access_token = None
-        self.token_expiration_time = None
+        self.token_expiration_time =datetime.now() - timedelta(days=1)
         self.consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
         self.consumer_secret = 'ap7qAoVZ5hIL4ocx'
         self.api_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
