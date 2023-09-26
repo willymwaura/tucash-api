@@ -39,11 +39,10 @@ class Homepage(APIView):
     
 
 
-
 class TokenManager:
     def __init__(self):
         self.access_token = None
-        self.token_expiration_time =datetime.now() - timedelta(days=1)
+        self.token_expiration_time = datetime.now() - timedelta(days=1)  # Set an initial value in the past
         self.consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
         self.consumer_secret = 'ap7qAoVZ5hIL4ocx'
         self.api_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
@@ -67,7 +66,12 @@ class TokenManager:
         expires_in = mpesa_access_token.get('expires_in')
 
         if self.access_token and expires_in:
-            self.token_expiration_time = datetime.now() + timedelta(seconds=expires_in)
+            # Convert expires_in to an integer before adding it to the current time
+            expires_in = int(expires_in)
+            # Ensure the expiration time is never in the past
+            new_expiration_time = datetime.now() + timedelta(seconds=expires_in)
+            if new_expiration_time > self.token_expiration_time:
+                self.token_expiration_time = new_expiration_time
 
     def auto_renew_token(self):
         while True:
@@ -78,7 +82,6 @@ class TokenManager:
             
             # Renew the token
             self.fetch_new_token()
-
 class GetToken(APIView):
     token_manager = TokenManager()
 
