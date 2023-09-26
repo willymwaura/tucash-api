@@ -78,7 +78,7 @@ class lipanampesa(APIView):
         
 
         api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-        headers = {"Authorization": "Bearer %s" % access_token}
+        headers = {"Authorization": "Bearer %s" % "IBjh1DIXHQyhiG5hPycjAUOO3bU0"}
         request = {
             "BusinessShortCode": LipanaMpesaPpassword.Business_short_code,
             "Password": LipanaMpesaPpassword.decode_password,
