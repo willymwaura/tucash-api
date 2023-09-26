@@ -20,6 +20,7 @@ from django.views.decorators.vary import vary_on_headers
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import api_view, permission_classes
 import requests
+from django.core.cache import cache
 
 from main.models import TillTranscations,Balance,MpesaDeposits,PaybillTranscations,TucashTransactions
 from authapp.models import CustomUser
@@ -37,7 +38,6 @@ class Homepage(APIView):
     
     
     
-
 
 class TokenManager:
     def __init__(self):
@@ -72,6 +72,8 @@ class TokenManager:
             new_expiration_time = datetime.now() + timedelta(seconds=expires_in)
             if new_expiration_time > self.token_expiration_time:
                 self.token_expiration_time = new_expiration_time
+                # Store the renewed token in the cache
+                cache.set('access_token', self.access_token, timeout=expires_in)
 
     def auto_renew_token(self):
         while True:
@@ -80,8 +82,9 @@ class TokenManager:
             if sleep_duration > 0:
                 time.sleep(sleep_duration)
             
-            # Renew the token
+            # Renew the token and update the cache
             self.fetch_new_token()
+
 class GetToken(APIView):
     token_manager = TokenManager()
 
@@ -109,11 +112,7 @@ class lipanampesa(APIView):
         Amount=request.data["Amount"]
         
         print(phone)
-        gettoken_url = "https://tucash-api-production.up.railway.app/gettoken/"
-
-        # Make a GET request to the gettoken view
-        access_token= requests.get(gettoken_url)
-        access_token=access_token.text
+        access_token = cache.get('access_token')
         print("the token is ",access_token)
         #access_token = MpesaAccessToken.validated_mpesa_access_token
         
@@ -269,11 +268,8 @@ class paybill_transactions(APIView):
         paybill=request.data["paybill"]
         Amount=request.data["amount"]
         account_number=request.data["account_number"]
-        gettoken_url = "https://tucash-api-production.up.railway.app/gettoken/"
-
-        # Make a GET request to the gettoken view
-        access_token= requests.get(gettoken_url)
-        access_token=access_token.text
+        access_token = cache.get('access_token')
+        print("the token is ",access_token)
         
         
         #access_token = MpesaAccessToken.validated_mpesa_access_token
@@ -334,11 +330,8 @@ class till_transactions(APIView):
         
         
         #access_token = MpesaAccessToken.validated_mpesa_access_token
-        gettoken_url = "https://tucash-api-production.up.railway.app/gettoken/"
-
-        # Make a GET request to the gettoken view
-        access_token= requests.get(gettoken_url)
-        access_token=access_token.text
+        access_token = cache.get('access_token')
+        print("the token is ",access_token)
         
 
         api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
