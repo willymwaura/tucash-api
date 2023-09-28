@@ -167,3 +167,27 @@ then stkpush sends this response to the /callback/
     }
 }
 which you use to do your logic
+
+8: transacting to paybill
+POST REQUEST
+url="https://tucash-api-production.up.railway.app/paybill_transactions/"
+
+json 
+{
+    "paybill":"570777",
+    "account_number":"254112100378",
+    "amount":"1",
+    "user_id":"6"#id of the user making the request
+}
+
+9.transacting to till number
+POST REQUEST
+URL="https://tucash-api-production.up.railway.app/till_transactions/"
+
+json
+{
+    "till":"570777",
+    "amount":"1",
+    "user_id":"6"#id of the user making the request
+}
+

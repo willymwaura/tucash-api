@@ -35,6 +35,7 @@ class PaybillTranscations(models.Model):
     datetime=models.DateTimeField(auto_now_add=True,blank=False)
     status=models.BooleanField(default=False,blank=False)
     OriginatorConversationID=models.CharField(max_length=30,default=111,blank=False)
+    user_id=models.IntegerField(blank=False,default=0)
 
 class TillTranscations(models.Model):
     till_number=models.IntegerField(blank=False,default=0)
@@ -42,3 +43,4 @@ class TillTranscations(models.Model):
     datetime=models.DateTimeField(auto_now_add=True,blank=False)
     status=models.BooleanField(default=False)
     OriginatorConversationID=models.CharField(max_length=30,default=111,blank=False)
+    user_id=models.IntegerField(blank=False,default=0)

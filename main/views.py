@@ -167,7 +167,7 @@ class MpesaCallback(APIView):
                     balance_entry = Balance.objects.get(user_id=user.id)
                     balance_entry.amount += amount
                     balance_entry.save()
-                    transaction=MpesaDeposits(amount=amount,PhoneNumber=phone_number,status=True)
+                    transaction=MpesaDeposits(Amount=amount,PhoneNumber=phone_number,status=True)
                     transaction.save()
                 except ObjectDoesNotExist:
                     # You may want to create a new balance entry for the user if it doesn't exist
@@ -188,10 +188,13 @@ class MpesaCallback(APIView):
             print("status 1013")
             print(amount)
             print(phone_number)
-            transaction=MpesaDeposits(amount=amount,honeNumber=phone_number)
+            transaction=MpesaDeposits(Amount=amount,PhoneNumber=phone_number)
             transaction.save()
             #logic to save the transaction
             return JsonResponse({'message':'stk response but not successful deposit'})
+        else:
+            return JsonResponse({'message':'stk response but not successful deposit'})
+
             
 
     def get(self, request):
@@ -270,43 +273,52 @@ class paybill_transactions(APIView):
         account_number=request.data["account_number"]
         access_token = cache.get('access_token')
         print("the token is ",access_token)
+        user_id=request.data["user_id"]
         
         
         #access_token = MpesaAccessToken.validated_mpesa_access_token
-        
+        sender_balance = Balance.objects.get(user_id=user_id)
+        try:
+            if sender_balance.amount >= Amount:
+                    # Deduct the amount from the sender's balance
+                    sender_balance.amount -= Amount
+                    sender_balance.save()
+            
 
-        api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
-        headers = {"Authorization": "Bearer %s" % access_token}
-        request = { 
-        "Initiator":"API_Usename",
-        "SecurityCredential":LipanaMpesaPpassword.decode_password,
-        "CommandID": "BusinessPayBill",
-        "SenderIdentifierType": "4",
-        "RecieverIdentifierType":"4",
-        "Amount":Amount,
-        "PartyA":LipanaMpesaPpassword.Business_short_code,
-        "PartyB":paybill,#the paybill where money is being sent 
-        "AccountReference":account_number,
-        "Requester":"254700000000",#the mobile number used to register the paybill
-        "Remarks":"OK",
-        "QueueTimeOutURL":"https://tucash-api-production.up.railway.app/callback/",
-        "ResultURL":"https://tucash-api-production.up.railway.app/paybill_callback/",
-        }
-        
-        response = requests.post(api_url, json=request, headers=headers)
-        if response.headers.get('content-type') == 'application/json':
-            try:
-                response_json = response.json()
-                originator_conversation_id = response_json.get('OriginatorConversationID')
-                
-                # Check if OriginatorConversationID is present in the response
-                if originator_conversation_id:
-                    paybill_transaction=PaybillTranscations(paybill=paybill,amount=Amount,OriginatorConversationID=originator_conversation_id,account_number=account_number)
-                    paybill_transaction.save()
-            except ValueError:
-                # Handle JSON parsing error if the response is not valid JSON
-                print("Error: Response is not valid JSON.")
-        return HttpResponse(response)
+            api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
+            headers = {"Authorization": "Bearer %s" % access_token}
+            request = { 
+            "Initiator":"API_Usename",
+            "SecurityCredential":LipanaMpesaPpassword.decode_password,
+            "CommandID": "BusinessPayBill",
+            "SenderIdentifierType": "4",
+            "RecieverIdentifierType":"4",
+            "Amount":Amount,
+            "PartyA":LipanaMpesaPpassword.Business_short_code,
+            "PartyB":paybill,#the paybill where money is being sent 
+            "AccountReference":account_number,
+            "Requester":"254700000000",#the mobile number used to register the paybill
+            "Remarks":"OK",
+            "QueueTimeOutURL":"https://tucash-api-production.up.railway.app/callback/",
+            "ResultURL":"https://tucash-api-production.up.railway.app/paybill_callback/",
+            }
+            
+            response = requests.post(api_url, json=request, headers=headers)
+            if response.headers.get('content-type') == 'application/json':
+                try:
+                    response_json = response.json()
+                    originator_conversation_id = response_json.get('OriginatorConversationID')
+                    
+                    # Check if OriginatorConversationID is present in the response
+                    if originator_conversation_id:
+                        paybill_transaction=PaybillTranscations(paybill=paybill,amount=Amount,OriginatorConversationID=originator_conversation_id,account_number=account_number,user_id=user_id)
+                        paybill_transaction.save()
+                except ValueError:
+                    # Handle JSON parsing error if the response is not valid JSON
+                    print("Error: Response is not valid JSON.")
+            return HttpResponse(response)
+        except:
+            return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
 
 class till_transactions(APIView):
     
@@ -327,43 +339,52 @@ class till_transactions(APIView):
         
         till=request.data["till_number"]
         amount=request.data["amount"]
+        user_id=request.data["user_id"]
         
         
         #access_token = MpesaAccessToken.validated_mpesa_access_token
         access_token = cache.get('access_token')
         print("the token is ",access_token)
+        sender_balance = Balance.objects.get(user_id=user_id)
+        try:
+            if sender_balance.amount >= amount:
+                    # Deduct the amount from the sender's balance
+                    sender_balance.amount -= amount
+                    sender_balance.save()
         
 
-        api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
-        headers = {"Authorization": "Bearer %s" % access_token}
-        request = {
-            "InitiatorName": "API_Username",
-            "SecurityCredential": LipanaMpesaPpassword.decode_password,
-            "CommandID": "BusinessPayment",
-            "Amount": amount,  # Change this to the desired amount for the transaction
-            "PartyA": LipanaMpesaPpassword.Business_short_code,
-            "PartyB": till,  # Change this to the Till number where money is being sent
-            "Remarks": "Payment to Till",
-            "QueueTimeOutURL": "https://tucash-api-production.up.railway.app/callback/",
-            "ResultURL": "https://tucash-api-production.up.railway.app/paybill_callback/",
-            "Occasion": "Payment"
-        }
+            api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
+            headers = {"Authorization": "Bearer %s" % access_token}
+            request = {
+                "InitiatorName": "API_Username",
+                "SecurityCredential": LipanaMpesaPpassword.decode_password,
+                "CommandID": "BusinessPayment",
+                "Amount": amount,  # Change this to the desired amount for the transaction
+                "PartyA": LipanaMpesaPpassword.Business_short_code,
+                "PartyB": till,  # Change this to the Till number where money is being sent
+                "Remarks": "Payment to Till",
+                "QueueTimeOutURL": "https://tucash-api-production.up.railway.app/callback/",
+                "ResultURL": "https://tucash-api-production.up.railway.app/paybill_callback/",
+                "Occasion": "Payment"
+            }
+            
+            response = requests.post(api_url, json=request, headers=headers)
+            if response.headers.get('content-type') == 'application/json':
+                try:
+                    response_json = response.json()
+                    originator_conversation_id = response_json.get('OriginatorConversationID')
+                    
+                    # Check if OriginatorConversationID is present in the response
+                    if originator_conversation_id:
+                        till_transaction=PaybillTranscations(till=till,amount=amount,OriginatorConversationID=originator_conversation_id,user_id=user_id)
+                        till_transaction.save()
+                except ValueError:
+                    # Handle JSON parsing error if the response is not valid JSON
+                    print("Error: Response is not valid JSON.")
+            return HttpResponse(response)
+        except:
+            return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
         
-        response = requests.post(api_url, json=request, headers=headers)
-        if response.headers.get('content-type') == 'application/json':
-            try:
-                response_json = response.json()
-                originator_conversation_id = response_json.get('OriginatorConversationID')
-                
-                # Check if OriginatorConversationID is present in the response
-                if originator_conversation_id:
-                    till_transaction=PaybillTranscations(till=till,amount=amount,OriginatorConversationID=originator_conversation_id)
-                    till_transaction.save()
-            except ValueError:
-                # Handle JSON parsing error if the response is not valid JSON
-                print("Error: Response is not valid JSON.")
-        return HttpResponse(response)
-    
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View

@@ -25,10 +25,10 @@ class TransactionSerializer(serializers.Serializer):
 class PaybillSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaybillTranscations
-        fields = ['paybill', 'account_number','amount']
+        fields = ['paybill', 'account_number','amount','user_id']
 class TillSerializer(serializers.ModelSerializer):
     class Meta:
         model = TillTranscations
-        fields = ['till_number', 'amount']
+        fields = ['till_number', 'amount','user_id']
 
 
