@@ -50,7 +50,8 @@ class GetToken(APIView):
         if response.status_code == 200:
             mpesa_access_token = response.json()
             access_token = mpesa_access_token.get('access_token')
-            cache.set('access_token', access_token)
+            print("save the token in cache")
+            cache.set('access_token', access_token,1200)
             return HttpResponse(access_token)
         else:
             # Handle the case where the request to obtain the token fails
