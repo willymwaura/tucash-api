@@ -368,44 +368,44 @@ class Till_transactions(APIView):
         try:
             if int(sender_balance.amount) >= amount:
                     # Deduct the amount from the sender's balance
-                    sender_balance.amount -= amount
-                    sender_balance.save()
+                sender_balance.amount -= amount
+                sender_balance.save()
         
 
-            api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
-            headers = {"Authorization": "Bearer %s" % access_token}
-            request = {
-                "InitiatorName": "API_Username",
-                "SecurityCredential": LipanaMpesaPpassword.decode_password,
-                "CommandID": "BusinessPayment",
-                "Amount": amount,  # Change this to the desired amount for the transaction
-                "PartyA": LipanaMpesaPpassword.Business_short_code,
-                "PartyB": till,  # Change this to the Till number where money is being sent
-                "Remarks": "Payment to Till",
-                "QueueTimeOutURL": "https://tucash-api-production.up.railway.app/callback/",
-                "ResultURL": "https://tucash-api-production.up.railway.app/paybill_callback/",
-                "Occasion": "Payment"
-            }
-            
-            response = requests.post(api_url, json=request, headers=headers)
-            print(response.text)
-            if response.status_code == 200:
-                response_json = response.json()
-                originator_conversation_id = response_json.get('OriginatorConversationID')
-                print("the originator is is ",originator_conversation_id)
+                api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
+                headers = {"Authorization": "Bearer %s" % access_token}
+                request = {
+                    "InitiatorName": "API_Username",
+                    "SecurityCredential": LipanaMpesaPpassword.decode_password,
+                    "CommandID": "BusinessPayment",
+                    "Amount": amount,  # Change this to the desired amount for the transaction
+                    "PartyA": LipanaMpesaPpassword.Business_short_code,
+                    "PartyB": till,  # Change this to the Till number where money is being sent
+                    "Remarks": "Payment to Till",
+                    "QueueTimeOutURL": "https://tucash-api-production.up.railway.app/callback/",
+                    "ResultURL": "https://tucash-api-production.up.railway.app/paybill_callback/",
+                    "Occasion": "Payment"
+                }
+                
+                response = requests.post(api_url, json=request, headers=headers)
+                print(response.text)
+                if response.status_code == 200:
+                    response_json = response.json()
+                    originator_conversation_id = response_json.get('OriginatorConversationID')
+                    print("the originator is is ",originator_conversation_id)
 
-                            # Check if OriginatorConversationID is present in the response
-                if originator_conversation_id !=None:
-                    till_transaction=PaybillTranscations(till=till,amount=amount,OriginatorConversationID=originator_conversation_id,user_id=user_id)
-                    till_transaction.save()
-                   
-                    return Response(response.json())
+                                # Check if OriginatorConversationID is present in the response
+                    if originator_conversation_id !=None:
+                        till_transaction=PaybillTranscations(till=till,amount=amount,OriginatorConversationID=originator_conversation_id,user_id=user_id)
+                        till_transaction.save()
+                    
+                        return Response(response.json())
+                    
                 else:
                             # Handle JSON parsing error if the response is not valid JSON
                     print("Error: Response is not valid JSON.")
                     return Response({'message': ' Response is not valid JSON'}, status=status.HTTP_400_BAD_REQUEST)
-
-                   
+                    
             else:
                 return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
 
