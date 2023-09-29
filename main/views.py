@@ -405,11 +405,11 @@ class till_transactions(APIView):
         
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views import View
-import json
+from django.utils.decorators import method_decorator
 
 #@csrf_exempt  # Disable CSRF protection for this view if necessary
-class PaybillCallbackView(View):
+@method_decorator(csrf_exempt, name='dispatch')
+class PaybillCallbackView(APIView):
 
     def post(self, request):
         try:
@@ -441,7 +441,7 @@ class PaybillCallbackView(View):
             error_response = {"error": str(e)}
             return JsonResponse(error_response, status=500)
         
-class TillCallbackView(View):
+class TillCallbackView(APIView):
 
     def post(self, request):
         try:
