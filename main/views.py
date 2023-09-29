@@ -325,6 +325,7 @@ class paybill_transactions(APIView):
                                 user_id=user_id
                                 )
                         paybill_transaction.save()
+                        return Response(response.json())
                     else:
                             # Handle JSON parsing error if the response is not valid JSON
                                 print("Error: Response is not valid JSON.")
