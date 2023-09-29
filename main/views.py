@@ -378,7 +378,11 @@ class Till_transactions(APIView):
                 request = {
                     "InitiatorName": "API_Username",
                     "SecurityCredential": LipanaMpesaPpassword.decode_password,
-                    "CommandID": "BusinessPayment",
+                   "CommandID": "BusinessPayBill",
+                    "SenderIdentifierType": "4",
+                    "RecieverIdentifierType": "4",
+                     "AccountReference":"2547000000000",
+                    "Requester": "254700000000", 
                     "Amount": amount,  # Change this to the desired amount for the transaction
                     "PartyA": LipanaMpesaPpassword.Business_short_code,
                     "PartyB": till,  # Change this to the Till number where money is being sent
