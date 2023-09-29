@@ -253,67 +253,80 @@ class UpdateBalanceAPIView(APIView):
 from  main.mpesa_credentials import LipanaMpesaPpassword
 class paybill_transactions(APIView):
     
-    def post(self,request):
+    def post(self, request):
         #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken
         
         print("lipa to paybill starting")
-        
         print(request.data)
-        serializer=PaybillSerializer(data=request.data)
+        serializer = PaybillSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
             print("saved")
         else:
             print("Validation Errors:", serializer.errors)
-        
-        
-        paybill=request.data["paybill"]
-        Amount=request.data["amount"]
-        account_number=request.data["account_number"]
+
+        paybill = request.data["paybill"]
+        Amount = int(request.data["amount"])
+        print("amount is ", Amount)
+        account_number = request.data["account_number"]
         access_token = cache.get('access_token')
-        print("the token is ",access_token)
-        user_id=request.data["user_id"]
-        
-        
+        #access_token = "2GsG02kS7P0sAKgnGc4ZGRq0WWEi"
+        print("the token is ", access_token)
+        user_id = request.data["user_id"]
+
         #access_token = MpesaAccessToken.validated_mpesa_access_token
-        sender_balance = Balance.objects.get(user_id=user_id)
-        print("sender balance is ",sender_balance)
+        sender_balance_obj = Balance.objects.get(user_id=user_id)
+        sender_balance = int(sender_balance_obj.amount)  # Assuming 'balance' is the field with the float value
+        print("sender balance is", sender_balance)
+
         try:
-            if sender_balance.amount >= Amount:
-                    # Deduct the amount from the sender's balance
-                sender_balance.amount -= Amount
-                sender_balance.save()
-            
+            print("try starting")
+            if sender_balance >=Amount:
+                print("fetching balance")
+                sender_balance -= Amount
+                sender_balance = float(sender_balance)
+                sender_balance_obj.amount=sender_balance
+                sender_balance_obj.save()
 
                 api_url = "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
                 headers = {"Authorization": "Bearer %s" % access_token}
-                request = { 
-                "Initiator":"API_Usename",
-                "SecurityCredential":LipanaMpesaPpassword.decode_password,
-                "CommandID": "BusinessPayBill",
-                "SenderIdentifierType": "4",
-                "RecieverIdentifierType":"4",
-                "Amount":Amount,
-                "PartyA":LipanaMpesaPpassword.Business_short_code,
-                "PartyB":paybill,#the paybill where money is being sent 
-                "AccountReference":account_number,
-                "Requester":"254700000000",#the mobile number used to register the paybill
-                "Remarks":"OK",
-                "QueueTimeOutURL":"https://tucash-api-production.up.railway.app/callback/",
-                "ResultURL":"https://tucash-api-production.up.railway.app/paybill_callback/",
+                request_data = { 
+                    "Initiator": "API_Username",
+                    "SecurityCredential": LipanaMpesaPpassword.decode_password,
+                    "CommandID": "BusinessPayBill",
+                    "SenderIdentifierType": "4",
+                    "RecieverIdentifierType": "4",
+                    "Amount": Amount,
+                    "PartyA": LipanaMpesaPpassword.Business_short_code,
+                    "PartyB": paybill,  # the paybill where money is being sent 
+                    "AccountReference": account_number,
+                    "Requester": "254700000000",  # the mobile number used to register the paybill
+                    "Remarks": "OK",
+                    "QueueTimeOutURL": "https://tucash-api-production.up.railway.app/callback/",
+                    "ResultURL": "https://tucash-api-production.up.railway.app/paybill_callback/",
                 }
-                
-                response = requests.post(api_url, json=request, headers=headers)
+                print("sending request")
+
+                response = requests.post(api_url, json=request_data, headers=headers)
+                print(response)
+
                 if response.headers.get('content-type') == 'application/json':
                     try:
                         response_json = response.json()
                         originator_conversation_id = response_json.get('OriginatorConversationID')
-                        
+
                         # Check if OriginatorConversationID is present in the response
                         if originator_conversation_id:
-                            paybill_transaction=PaybillTranscations(paybill=paybill,amount=Amount,OriginatorConversationID=originator_conversation_id,account_number=account_number,user_id=user_id)
+                            paybill_transaction = PaybillTranscations(
+                                paybill=paybill,
+                                amount=Amount,
+                                OriginatorConversationID=originator_conversation_id,
+                                account_number=account_number,
+                                user_id=user_id
+                            )
                             paybill_transaction.save()
+                        return HttpResponse(response)
                     except ValueError:
                         # Handle JSON parsing error if the response is not valid JSON
                         print("Error: Response is not valid JSON.")
@@ -322,7 +335,7 @@ class paybill_transactions(APIView):
                 return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
 
         except:
-            return Response({'message': 'error occured'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'error occurred'}, status=status.HTTP_400_BAD_REQUEST)
 
 class till_transactions(APIView):
     
