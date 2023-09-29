@@ -316,7 +316,7 @@ class paybill_transactions(APIView):
                     print("the originator is is ",originator_conversation_id)
 
                             # Check if OriginatorConversationID is present in the response
-                    if originator_conversation_id:
+                    if originator_conversation_id and originator_conversation_id !=111:
                         paybill_transaction = PaybillTranscations(
                                 paybill=paybill,
                                 amount=Amount,
