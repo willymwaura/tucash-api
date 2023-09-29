@@ -250,7 +250,7 @@ class UpdateBalanceAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-from  main.mpesa_credentials import LipanaMpesaPpassword
+#from  main.mpesa_credentials import LipanaMpesaPpassword
 class paybill_transactions(APIView):
     
     def post(self, request):
@@ -381,7 +381,7 @@ class Till_transactions(APIView):
                    "CommandID": "BusinessPayBill",
                     "SenderIdentifierType": "4",
                     "RecieverIdentifierType": "4",
-                     "AccountReference":"2547000000000",
+                    "AccountReference":"2547000000000",
                     "Requester": "254700000000", 
                     "Amount": amount,  # Change this to the desired amount for the transaction
                     "PartyA": LipanaMpesaPpassword.Business_short_code,
