@@ -37,60 +37,24 @@ class Homepage(APIView):
         return HttpResponse("This is the homepage")
     
     
-    
-
-class TokenManager:
-    def __init__(self):
-        self.access_token = None
-        self.token_expiration_time = datetime.now() - timedelta(days=1)  # Set an initial value in the past
-        self.consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
-        self.consumer_secret = 'ap7qAoVZ5hIL4ocx'
-        self.api_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-        self.lock = threading.Lock()
-        
-        # Start a thread to automatically renew the token before it expires
-        renewal_thread = threading.Thread(target=self.auto_renew_token)
-        renewal_thread.daemon = True
-        renewal_thread.start()
-
-    def get_access_token(self):
-        with self.lock:
-            if self.access_token is None or datetime.now() >= self.token_expiration_time:
-                self.fetch_new_token()
-            return self.access_token
-
-    def fetch_new_token(self):
-        r = requests.get(self.api_url, auth=HTTPBasicAuth(self.consumer_key, self.consumer_secret))
-        mpesa_access_token = json.loads(r.text)
-        self.access_token = mpesa_access_token.get('access_token')
-        expires_in = mpesa_access_token.get('expires_in')
-
-        if self.access_token and expires_in:
-            # Convert expires_in to an integer before adding it to the current time
-            expires_in = int(expires_in)
-            # Ensure the expiration time is never in the past
-            new_expiration_time = datetime.now() + timedelta(seconds=expires_in)
-            if new_expiration_time > self.token_expiration_time:
-                self.token_expiration_time = new_expiration_time
-                # Store the renewed token in the cache
-                
-
-    def auto_renew_token(self):
-        while True:
-            # Sleep for a period slightly shorter than the token expiration time
-            sleep_duration = (self.token_expiration_time - datetime.now() - timedelta(seconds=10)).total_seconds()
-            if sleep_duration > 0:
-                time.sleep(sleep_duration)
-            
-            # Renew the token and update the cache
-            self.fetch_new_token()
 
 class GetToken(APIView):
-    token_manager = TokenManager()
-
+    
     def get(self, request):
-        access_token = self.token_manager.get_access_token()
-        return HttpResponse(access_token)
+        consumer_key = 'your_consumer_key'
+        consumer_secret = 'your_consumer_secret'
+        api_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+
+        response = requests.get(api_url, auth=(consumer_key, consumer_secret))
+
+        if response.status_code == 200:
+            mpesa_access_token = response.json()
+            access_token = mpesa_access_token.get('access_token')
+            cache.set('access_token', access_token)
+            return HttpResponse(access_token)
+        else:
+            # Handle the case where the request to obtain the token fails
+            return HttpResponse("Token request failed", status=response.status_code)
 from  main.mpesa_credentials import LipanaMpesaPpassword 
 class lipanampesa(APIView):
     
