@@ -364,6 +364,7 @@ class Till_transactions(APIView):
         access_token = cache.get('access_token')
         print("the token is ",access_token)
         sender_balance = Balance.objects.get(user_id=user_id)
+        print("sender balance is ",sender_balance)
         try:
             if int(sender_balance.amount) >= amount:
                     # Deduct the amount from the sender's balance
