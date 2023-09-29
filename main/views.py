@@ -414,6 +414,7 @@ class PaybillCallbackView(View):
         try:
             # Parse the JSON data from the request body
             data = json.loads(request.body.decode('utf-8'))
+            print(data)
 
             # Extract relevant information from the JSON data
             result_code = data["Result"]["ResultCode"]
