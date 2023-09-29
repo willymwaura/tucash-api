@@ -356,6 +356,7 @@ class Till_transactions(APIView):
         
         
         till=request.data["till_number"]
+        print("till number is ",till)
         amount=int(request.data["amount"])
         user_id=request.data["user_id"]
         
@@ -404,7 +405,7 @@ class Till_transactions(APIView):
                 else:
                             # Handle JSON parsing error if the response is not valid JSON
                     print("Error: Response is not valid JSON.")
-                    return Response({'message': ' Response is not valid JSON'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'message': ' till push not succesful'}, status=status.HTTP_400_BAD_REQUEST)
                     
             else:
                 return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
