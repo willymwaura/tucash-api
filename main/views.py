@@ -316,6 +316,7 @@ class paybill_transactions(APIView):
                         try:
                             response_json = response.json()
                             originator_conversation_id = response_json.get('OriginatorConversationID')
+                            print(originator_conversation_id)
 
                             # Check if OriginatorConversationID is present in the response
                             if originator_conversation_id:
