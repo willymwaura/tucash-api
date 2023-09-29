@@ -338,7 +338,7 @@ class paybill_transactions(APIView):
         except:
             return Response({'message': 'error occurred'}, status=status.HTTP_400_BAD_REQUEST)
 
-class till_transactions(APIView):
+class Till_transactions(APIView):
     
     def post(self,request):
         #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
