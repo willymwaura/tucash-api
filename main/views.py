@@ -271,7 +271,7 @@ class paybill_transactions(APIView):
         print("amount is ", Amount)
         account_number = request.data["account_number"]
         access_token = cache.get('access_token')
-        #access_token = "2GsG02kS7P0sAKgnGc4ZGRq0WWEi"
+        #access_token = "8CMMHLGyFfqrj2KD0VtpyI7dBF73"
         print("the token is ", access_token)
         user_id = request.data["user_id"]
 
@@ -309,28 +309,31 @@ class paybill_transactions(APIView):
                 print("sending request")
 
                 response = requests.post(api_url, json=request_data, headers=headers)
-                print(response)
+                print(response.text)
+                if response.status_code == 200:
 
-                if response.headers.get('content-type') == 'application/json':
-                    try:
-                        response_json = response.json()
-                        originator_conversation_id = response_json.get('OriginatorConversationID')
+                    if response.headers.get('content-type') == 'application/json':
+                        try:
+                            response_json = response.json()
+                            originator_conversation_id = response_json.get('OriginatorConversationID')
 
-                        # Check if OriginatorConversationID is present in the response
-                        if originator_conversation_id:
-                            paybill_transaction = PaybillTranscations(
-                                paybill=paybill,
-                                amount=Amount,
-                                OriginatorConversationID=originator_conversation_id,
-                                account_number=account_number,
-                                user_id=user_id
-                            )
-                            paybill_transaction.save()
-                        return HttpResponse(response)
-                    except ValueError:
-                        # Handle JSON parsing error if the response is not valid JSON
-                        print("Error: Response is not valid JSON.")
-                        return HttpResponse(response)
+                            # Check if OriginatorConversationID is present in the response
+                            if originator_conversation_id:
+                                paybill_transaction = PaybillTranscations(
+                                    paybill=paybill,
+                                    amount=Amount,
+                                    OriginatorConversationID=originator_conversation_id,
+                                    account_number=account_number,
+                                    user_id=user_id
+                                )
+                                paybill_transaction.save()
+                        except ValueError:
+                            # Handle JSON parsing error if the response is not valid JSON
+                            print("Error: Response is not valid JSON.")
+                            return Response({'message': ' Response is not valid JSON'}, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        
+                        return Response(response.json()) 
             else:
                 return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
 
