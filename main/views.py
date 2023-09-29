@@ -356,7 +356,7 @@ class till_transactions(APIView):
         
         
         till=request.data["till_number"]
-        amount=request.data["amount"]
+        amount=int(request.data["amount"])
         user_id=request.data["user_id"]
         
         
@@ -365,7 +365,7 @@ class till_transactions(APIView):
         print("the token is ",access_token)
         sender_balance = Balance.objects.get(user_id=user_id)
         try:
-            if sender_balance.amount >= amount:
+            if int(sender_balance.amount) >= amount:
                     # Deduct the amount from the sender's balance
                     sender_balance.amount -= amount
                     sender_balance.save()
@@ -387,22 +387,30 @@ class till_transactions(APIView):
             }
             
             response = requests.post(api_url, json=request, headers=headers)
-            if response.headers.get('content-type') == 'application/json':
-                try:
-                    response_json = response.json()
-                    originator_conversation_id = response_json.get('OriginatorConversationID')
-                    
-                    # Check if OriginatorConversationID is present in the response
-                    if originator_conversation_id:
-                        till_transaction=PaybillTranscations(till=till,amount=amount,OriginatorConversationID=originator_conversation_id,user_id=user_id)
-                        till_transaction.save()
-                except ValueError:
-                    # Handle JSON parsing error if the response is not valid JSON
+            print(response.text)
+            if response.status_code == 200:
+                response_json = response.json()
+                originator_conversation_id = response_json.get('OriginatorConversationID')
+                print("the originator is is ",originator_conversation_id)
+
+                            # Check if OriginatorConversationID is present in the response
+                if originator_conversation_id !=None:
+                    till_transaction=PaybillTranscations(till=till,amount=amount,OriginatorConversationID=originator_conversation_id,user_id=user_id)
+                    till_transaction.save()
+                   
+                    return Response(response.json())
+                else:
+                            # Handle JSON parsing error if the response is not valid JSON
                     print("Error: Response is not valid JSON.")
-            return HttpResponse(response)
+                    return Response({'message': ' Response is not valid JSON'}, status=status.HTTP_400_BAD_REQUEST)
+
+                   
+            else:
+                return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
+
         except:
-            return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response({'message': 'error occurred'}, status=status.HTTP_400_BAD_REQUEST)
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -425,7 +433,7 @@ class PaybillCallbackView(APIView):
 
             # Save the extracted information to your database or perform other actions
             if result_code== 0:
-                paybill_transaction=PaybillTranscations.objects.filter(OriginatorConversationID=originator_conversation_id)
+                paybill_transaction = PaybillTranscations.objects.filter(OriginatorConversationID=originator_conversation_id).latest('datetime')
                 paybill_transaction=paybill_transaction(status=True)
                 paybill_transaction.save()
             # For example, you can use Django models to save data to your database.
@@ -450,27 +458,29 @@ class TillCallbackView(APIView):
         try:
             # Parse the JSON data from the request body
             data = json.loads(request.body.decode('utf-8'))
+            print(data)
 
             # Extract relevant information from the JSON data
-            result_code = data["Result"]["ResultCode"]
-            transaction_amount = data["TransactionAmount"]
-            OriginatorConversationID = data["OriginatorConversationID"]
+            result_code = data['Result']['ResultCode']
+            result_desc = data['Result']['ResultDesc']
+
+            originator_conversation_id = data['Result']['OriginatorConversationID']
 
             # Save the extracted information to your database or perform other actions
             # For example, you can use Django models to save data to your database.
 
             # Respond to the callback with a success message
             if result_code== 0:
-                till_transaction=TillTranscations.objects.filter(OriginatorConversationID=OriginatorConversationID)
+                till_transaction=TillTranscations.objects.filter(OriginatorConversationID=originator_conversation_id).latest('datetime')
                 till_transaction=till_transaction(status=True)
                 till_transaction.save()
-            # For example, you can use Django models to save data to your database.
-
-            # Respond to the callback with a success message
+        
                 response_data = {"message": "Callback for till received and data saved successfully"}
+                print(result_desc)
                 return JsonResponse(response_data, status=200)
             else:
                 response_data = {"message": "Callback for till received and but the transaction was not  successfu"}
+                print(result_desc)
                 return JsonResponse(response_data, status=200)
         except Exception as e:
             # Handle any exceptions that may occur during processing
