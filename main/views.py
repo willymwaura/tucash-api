@@ -41,8 +41,8 @@ class Homepage(APIView):
 class GetToken(APIView):
     
     def get(self, request):
-        consumer_key = 'your_consumer_key'
-        consumer_secret = 'your_consumer_secret'
+        consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
+        consumer_secret = 'ap7qAoVZ5hIL4ocx'
         api_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
 
         response = requests.get(api_url, auth=(consumer_key, consumer_secret))
@@ -55,6 +55,7 @@ class GetToken(APIView):
         else:
             # Handle the case where the request to obtain the token fails
             return HttpResponse("Token request failed", status=response.status_code)
+        
 from  main.mpesa_credentials import LipanaMpesaPpassword 
 class lipanampesa(APIView):
     
