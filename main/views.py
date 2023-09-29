@@ -311,15 +311,12 @@ class paybill_transactions(APIView):
                 response = requests.post(api_url, json=request_data, headers=headers)
                 print(response.text)
                 if response.status_code == 200:
-
-                    if response.headers.get('content-type') == 'application/json':
-                        try:
-                            response_json = response.json()
-                            originator_conversation_id = response_json.get('OriginatorConversationID')
-                            print(originator_conversation_id)
+                    response_json = response.json()
+                    originator_conversation_id = response_json.get('OriginatorConversationID')
+                    print("the originator is is ",originator_conversation_id)
 
                             # Check if OriginatorConversationID is present in the response
-                            if originator_conversation_id:
+                    if originator_conversation_id:
                                 paybill_transaction = PaybillTranscations(
                                     paybill=paybill,
                                     amount=Amount,
@@ -328,13 +325,12 @@ class paybill_transactions(APIView):
                                     user_id=user_id
                                 )
                                 paybill_transaction.save()
-                        except ValueError:
-                            # Handle JSON parsing error if the response is not valid JSON
-                            print("Error: Response is not valid JSON.")
-                            return Response({'message': ' Response is not valid JSON'}, status=status.HTTP_400_BAD_REQUEST)
                     else:
-                        
-                        return Response(response.json()) 
+                            # Handle JSON parsing error if the response is not valid JSON
+                                print("Error: Response is not valid JSON.")
+                                return Response({'message': ' Response is not valid JSON'}, status=status.HTTP_400_BAD_REQUEST)
+
+                   
             else:
                 return Response({'message': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
 
