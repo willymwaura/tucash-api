@@ -112,12 +112,8 @@ class lipanampesa(APIView):
         Amount=request.data["Amount"]
         
         print(phone)
-        get_token_url = "https://tucash-api-production.up.railway.app/gettoken/"
         
-        # Send a GET request to the GetToken view
-        response = requests.get(get_token_url)
-        access_token=response.text
-        #access_token = cache.get('access_token')
+        access_token = cache.get('access_token')
         print("the token is ",access_token)
         #access_token = MpesaAccessToken.validated_mpesa_access_token
         
@@ -275,11 +271,7 @@ class paybill_transactions(APIView):
         Amount = int(request.data["amount"])
         print("amount is ", Amount)
         account_number = request.data["account_number"]
-        get_token_url = "https://tucash-api-production.up.railway.app/gettoken/"
-        
-        # Send a GET request to the GetToken view
-        response = requests.get(get_token_url)
-        access_token=response.text
+        access_token = cache.get('access_token')
         #access_token = "8CMMHLGyFfqrj2KD0VtpyI7dBF73"
         print("the token is ", access_token)
         user_id = request.data["user_id"]
@@ -371,11 +363,7 @@ class Till_transactions(APIView):
         
         
         #access_token = MpesaAccessToken.validated_mpesa_access_token
-        get_token_url = "https://tucash-api-production.up.railway.app/gettoken/"
-        
-        # Send a GET request to the GetToken view
-        response = requests.get(get_token_url)
-        access_token=response.text
+        access_token = cache.get('access_token')
         print("the token is ",access_token)
         sender_balance = Balance.objects.get(user_id=user_id)
         print("sender balance is ",sender_balance)

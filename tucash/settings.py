@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
    
+   
     'main',
     'authapp',
     'django.contrib.staticfiles',
