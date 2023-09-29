@@ -317,14 +317,14 @@ class paybill_transactions(APIView):
 
                             # Check if OriginatorConversationID is present in the response
                     if originator_conversation_id:
-                                paybill_transaction = PaybillTranscations(
-                                    paybill=paybill,
-                                    amount=Amount,
-                                    OriginatorConversationID=originator_conversation_id,
-                                    account_number=account_number,
-                                    user_id=user_id
+                        paybill_transaction = PaybillTranscations(
+                                paybill=paybill,
+                                amount=Amount,
+                                OriginatorConversationID=originator_conversation_id,
+                                account_number=account_number,
+                                user_id=user_id
                                 )
-                                paybill_transaction.save()
+                        paybill_transaction.save()
                     else:
                             # Handle JSON parsing error if the response is not valid JSON
                                 print("Error: Response is not valid JSON.")
