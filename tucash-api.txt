@@ -179,6 +179,8 @@ json
     "amount":"1",
     "user_id":"6"#id of the user making the request
 }
+the json send to the callback is 
+{'Result': {'ResultType': 0, 'ResultCode': 2001, 'ResultDesc': 'The initiator information is invalid.', 'OriginatorConversationID': '27263-139623005-1', 'ConversationID': 'AG_20230929_20103446d02d77181f56', 'TransactionID': 'RIT0000000', 'ReferenceData': {'ReferenceItem': [{'Key': 'QueueTimeoutURL', 'Value': 'https://internalsandbox.safaricom.co.ke/mpesa/b2bresults/v1/submit';}, {'Key': 'Occassion'}]}}}
 
 9.transacting to till number
 POST REQUEST

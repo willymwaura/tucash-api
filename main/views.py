@@ -418,22 +418,25 @@ class PaybillCallbackView(APIView):
             print(data)
 
             # Extract relevant information from the JSON data
-            result_code = data["Result"]["ResultCode"]
-            transaction_amount = data["TransactionAmount"]
-            OriginatorConversationID = data["OriginatorConversationID"]
+            result_code = data['Result']['ResultCode']
+            result_desc = data['Result']['ResultDesc']
+
+            originator_conversation_id = data['Result']['OriginatorConversationID']
 
             # Save the extracted information to your database or perform other actions
             if result_code== 0:
-                paybill_transaction=PaybillTranscations.objects.filter(OriginatorConversationID=OriginatorConversationID)
+                paybill_transaction=PaybillTranscations.objects.filter(OriginatorConversationID=originator_conversation_id)
                 paybill_transaction=paybill_transaction(status=True)
                 paybill_transaction.save()
             # For example, you can use Django models to save data to your database.
 
             # Respond to the callback with a success message
                 response_data = {"message": "Callback received and data saved successfully"}
+                print(result_desc)
                 return JsonResponse(response_data, status=200)
             else:
                 response_data = {"message": "Callback received and but the transaction was not  successfu"}
+                print(result_desc)
                 return JsonResponse(response_data, status=200)
 
         except Exception as e:
