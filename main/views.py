@@ -106,7 +106,7 @@ class lipanampesa(APIView):
             "TransactionDesc": "Testing stk push"
         }
         response = requests.post(api_url, json=request, headers=headers)
-        print(response)
+        print(response.data)
         return HttpResponse(response)
 
 
