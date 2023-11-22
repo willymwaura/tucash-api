@@ -117,68 +117,59 @@ class lipanampesa(APIView):
 
 
 
+
+from asgiref.sync import async_to_sync
+from django.http import HttpResponse
+import json
+
 class MpesaCallback(APIView):
-    def post(self,request):
+    async def post(self, request):
         data = json.loads(request.body.decode('utf-8'))
         print("call back running")
         print(data)
 
-        # Extract transaction data from JSON payload
-        #transaction_id = data['TransactionID']
         callback_data = data.get('Body', {}).get('stkCallback', {})
         status = int(callback_data.get('ResultCode'))
-        #account_reference = data['BillRefNumber']
         print(f"ResultCode: {status}")
-        
 
-        # Check if transaction status is successful
         if status == 0:
             amount = float(callback_data.get('CallbackMetadata', {}).get('Item', [])[0].get('Value'))
             phone_number = callback_data.get('CallbackMetadata', {}).get('Item', [])[4].get('Value')
             print(amount)
             print(phone_number)
-            try:
-                # Find the user in the CustomUser model with the same phone number
-                user = CustomUser.objects.get(phone_number=str(phone_number))
-                
 
-                # Update the balance model instance with the user's ID
+            try:
+                user = CustomUser.objects.get(phone_number=str(phone_number))
                 try:
                     balance_entry = Balance.objects.get(user_id=user.id)
                     balance_entry.amount += amount
                     balance_entry.save()
-                    transaction=MpesaDeposits(Amount=amount,PhoneNumber=phone_number,status=True)
+                    transaction = MpesaDeposits(Amount=amount, PhoneNumber=phone_number, status=True)
                     transaction.save()
                 except ObjectDoesNotExist:
-                    # You may want to create a new balance entry for the user if it doesn't exist
                     pass
 
                 # Transaction saved
                 return JsonResponse({'message': 'Transaction saved'}, status=200)
 
             except CustomUser.DoesNotExist:
-                # User not found, you may want to handle this case accordingly
                 return JsonResponse({'error': 'User not found'}, status=404)
 
-        
-        #return JsonResponse({'message': 'Transaction received'}, status=200)
         if status == 1030:
             amount = float(callback_data.get('CallbackMetadata', {}).get('Item', [])[0].get('Value'))
             phone_number = callback_data.get('CallbackMetadata', {}).get('Item', [])[3].get('Value')
             print("status 1013")
             print(amount)
             print(phone_number)
-            transaction=MpesaDeposits(Amount=amount,PhoneNumber=phone_number)
+            transaction = MpesaDeposits(Amount=amount, PhoneNumber=phone_number)
             transaction.save()
-            #logic to save the transaction
-            return JsonResponse({'message':'stk response but not successful deposit'})
-        else:
-            return JsonResponse({'message':'stk response but not successful deposit'})
+            return JsonResponse({'message': 'stk response but not a successful deposit'})
 
-            
+        else:
+            return JsonResponse({'message': 'stk response but not a successful deposit'})
 
     def get(self, request):
-        return JsonResponse({'error': 'Method not allowed'}, status=405)  # Handle GET requests with a 405 response
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 class GetBalanceAPIView(APIView):
     def get(self, request, user_id):
