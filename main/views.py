@@ -106,8 +106,14 @@ class lipanampesa(APIView):
             "TransactionDesc": "Testing stk push"
         }
         response = requests.post(api_url, json=request, headers=headers)
-        print(response.data)
+        if response.status_code == 200:
+            print("API request successful")
+            print(response.json())
+        else:
+            print("API request failed with status code:", response.status_code)
+            print("Response content:", response.text)
         return HttpResponse(response)
+            
 
 
 
