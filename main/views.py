@@ -50,8 +50,10 @@ class GetToken(APIView):
         if response.status_code == 200:
             mpesa_access_token = response.json()
             access_token = mpesa_access_token.get('access_token')
-            print("save the token in cache")
-            cache.set('access_token', access_token,12000)
+            expires_in=mpesa_access_token.get('expires_in')
+            print("expires_in  :",expires_in)
+            print("save the token",access_token, "in cache")
+            cache.set('access_token', access_token)
             return JsonResponse({'message': "success", 'data': {'access-token': access_token}})
 
             
@@ -64,8 +66,8 @@ class lipanampesa(APIView):
     
     def post(self,request):
         #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
-        #get_token_instance = GetToken()
-        #get_token_instance.get(request)
+        get_token_instance = GetToken()
+        get_token_instance.get(request)
         
         print("starting the stkpush")
         print(request.data)
