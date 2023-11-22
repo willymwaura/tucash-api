@@ -52,9 +52,11 @@ class GetToken(APIView):
             access_token = mpesa_access_token.get('access_token')
             print("save the token in cache")
             cache.set('access_token', access_token,1200)
-            return HttpResponse(access_token)
+            return JsonResponse({'message': "success", 'data': {'access-token': access_token}})
+
+            
         else:
-            # Handle the case where the request to obtain the token fails
+            
             return HttpResponse("Token request failed", status=response.status_code)
         
 from  main.mpesa_credentials import LipanaMpesaPpassword 
@@ -62,6 +64,8 @@ class lipanampesa(APIView):
     
     def post(self,request):
         #from  main.mpesa_credentials import LipanaMpesaPpassword , MpesaAccessToken 
+        get_token_instance = GetToken()
+        get_token_instance.get(request)
         
         print("starting the stkpush")
         print(request.data)

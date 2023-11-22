@@ -188,7 +188,7 @@ URL="https://tucash-api-production.up.railway.app/till_transactions/"
 
 json
 {
-    "till":"570777",
+    "till_number":"570777",
     "amount":"1",
     "user_id":"6"#id of the user making the request
 }
