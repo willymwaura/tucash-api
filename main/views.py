@@ -168,7 +168,7 @@ class MpesaCallback(APIView):
         else:
             return JsonResponse({'message': 'stk response but not a successful deposit'})
 
-    def get(self, request):
+    async def get(self, request):
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 class GetBalanceAPIView(APIView):
