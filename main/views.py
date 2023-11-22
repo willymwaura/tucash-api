@@ -118,9 +118,7 @@ class lipanampesa(APIView):
 
 
 
-from asgiref.sync import async_to_sync
-from django.http import HttpResponse
-import json
+
 
 class MpesaCallback(APIView):
     def post(self, request):
