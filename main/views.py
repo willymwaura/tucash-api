@@ -123,7 +123,7 @@ from django.http import HttpResponse
 import json
 
 class MpesaCallback(APIView):
-    async def post(self, request):
+    def post(self, request):
         data = json.loads(request.body.decode('utf-8'))
         print("call back running")
         print(data)
@@ -168,7 +168,7 @@ class MpesaCallback(APIView):
         else:
             return JsonResponse({'message': 'stk response but not a successful deposit'})
 
-    async def get(self, request):
+    def get(self, request):
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 class GetBalanceAPIView(APIView):
