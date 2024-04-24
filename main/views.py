@@ -29,6 +29,12 @@ from main.serializers import Mpesaserializer,BalanceSerializer,TransactionSerial
 from requests.auth import HTTPBasicAuth
 import json
 from django.shortcuts import get_object_or_404
+from dotenv import load_dotenv
+
+
+# Load the environment variables from the .env file
+load_dotenv()
+import os
 
 
 
@@ -41,8 +47,8 @@ class Homepage(APIView):
 class GetToken(APIView):
     
     def get(self, request):
-        consumer_key = 'tD4pH6DJPxegfGAIBx2dQhh7t6Aig7kj'
-        consumer_secret = 'ap7qAoVZ5hIL4ocx'
+        consumer_key = os.getenv('consumer_key')
+        consumer_secret = os.getenv('consumer_secret')
         api_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
 
         response = requests.get(api_url, auth=(consumer_key, consumer_secret))
@@ -101,7 +107,7 @@ class lipanampesa(APIView):
             "PartyA":phone,
             "PartyB": LipanaMpesaPpassword.Business_short_code,
             "PhoneNumber":phone,
-            "CallBackURL": "https://tucash-api-production.up.railway.app/callback/",
+            "CallBackURL": os.getenv('CallBackURL'),
             "AccountReference": "Tucash ",
             "TransactionDesc": "Testing stk push"
         }

@@ -5,7 +5,7 @@ tucash api documentation
 url:tucash-api-production.up.railway.app/auth/register/
 
 HTTP REQUEST :POST
-json 
+json
 [
     {
     "email": "example1@example.com",
