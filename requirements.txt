@@ -6,7 +6,7 @@ django-cors-headers==3.13.0
 requests==2.31.0
 
 
-urllib3==1.26.10
+urllib3==1.26.19
 
 whitenoise==6.2.0
 psycopg2-binary==2.9.3
